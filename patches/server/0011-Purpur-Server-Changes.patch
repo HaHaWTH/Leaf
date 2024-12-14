@@ -3289,11 +3289,11 @@ index 18dad0825616c4167a0a7555689ee64910a87e09..6945992491027d43eca4f1ca697ad45c
              && this.lookTime > 0
              && entity.getBrain().getMemory(MemoryModuleType.INTERACTION_TARGET).isPresent();
 diff --git a/src/main/java/net/minecraft/world/entity/ai/behavior/TradeWithVillager.java b/src/main/java/net/minecraft/world/entity/ai/behavior/TradeWithVillager.java
-index 73e20e1f7d2bb1cd3d08e6bdca50efac22c9d958..b96e596fb123f5b69d2b2f5b4a65537beaab33e6 100644
+index 90ae43979e05839d676ab51feb489955ecbee50e..1acf55dd527ac06a46f7e29a720ec53565ddcb9d 100644
 --- a/src/main/java/net/minecraft/world/entity/ai/behavior/TradeWithVillager.java
 +++ b/src/main/java/net/minecraft/world/entity/ai/behavior/TradeWithVillager.java
 @@ -62,6 +62,12 @@ public class TradeWithVillager extends Behavior<Villager> {
-                 throwHalfStack(entity, Villager.FOOD_POINTS_KEY_ARRAY, villager); // Gale - optimize villager data storage
+                 throwHalfStack(entity, WHEAT_SINGLETON_ARRAY, villager); // Gale - optimize villager data storage
              }
  
 +            // Purpur start
