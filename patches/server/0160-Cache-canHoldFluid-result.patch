@@ -1,25 +1,23 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Dreeam <61569423+Dreeam-qwq@users.noreply.github.com>
 Date: Tue, 26 Nov 2024 17:15:38 -0500
-Subject: [PATCH] Simplify canHoldFluid condition logic
+Subject: [PATCH] Cache canHoldFluid result
 
 Cache the result of half of canHoldFluid logic, since there is a state#is in this method,
 it uses map contains to do iteration to check whether a block has a specific block tag key,
 which the contains iteration call is very expensive if called everytime
-Also, I simplified the condition logic in the original method to be more readable.
-It is actually useless since the result is cached, just makes it look better.
 
 In the test, it can improve ~30% performance in ~1577000 times of canHoldFluid calls (~159ms -> ~111ms)
 
 diff --git a/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java b/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
-index de299465937074a1067a6adfc208eaaa24bcae67..235ba8f5edc9e75d2b8e34ecd65df791aa7e4ff2 100644
+index de299465937074a1067a6adfc208eaaa24bcae67..8a14ab10956f3a83499b0f84034f6d342189d2f7 100644
 --- a/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
 +++ b/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
 @@ -794,6 +794,7 @@ public abstract class BlockBehaviour implements FeatureElement {
          protected BlockBehaviour.BlockStateBase.Cache cache;
          private FluidState fluidState;
          private boolean isRandomlyTicking;
-+        private boolean canHoldFluidInternal; // Leaf - Simplify canHoldFluid condition logic
++        private boolean canHoldFluidInternal; // Leaf - Cache canHoldFluid result
  
          // Paper start - rewrite chunk system
          private int opacityIfCached;
@@ -27,7 +25,7 @@ index de299465937074a1067a6adfc208eaaa24bcae67..235ba8f5edc9e75d2b8e34ecd65df791
              this.shapeExceedsCube = this.cache == null || this.cache.largeCollisionShape; // Paper - moved from actual method to here
  
              this.legacySolid = this.calculateSolid();
-+            this.canHoldFluidInternal = org.dreeam.leaf.util.fluid.FluidUtil.canHoldFluidInternal(this.getBlock(), this.asState()); // Leaf - Simplify canHoldFluid condition logic
++            this.canHoldFluidInternal = net.minecraft.world.level.material.FlowingFluid.canHoldAnyFluidInternal(this.getBlock(), this.asState()); // Leaf - Cache canHoldFluid result
              // Paper start - rewrite chunk system
              this.isConditionallyFullOpaque = this.canOcclude & this.useShapeForLightOcclusion;
              this.opacityIfCached = this.cache == null || this.isConditionallyFullOpaque ? -1 : this.cache.lightBlock;
@@ -35,61 +33,34 @@ index de299465937074a1067a6adfc208eaaa24bcae67..235ba8f5edc9e75d2b8e34ecd65df791
              return this.legacySolid;
          }
  
-+        // Leaf start - Simplify canHoldFluid condition logic
++        // Leaf start - Cache canHoldFluid result
 +        public boolean canHoldFluidInternal() {
 +            return canHoldFluidInternal;
 +        }
-+        // Leaf end - Simplify canHoldFluid condition logic
++        // Leaf end - Cache canHoldFluid result
 +
          // Paper start - Protect Bedrock and End Portal/Frames from being destroyed
          public final boolean isDestroyable() {
              return getBlock().isDestroyable();
 diff --git a/src/main/java/net/minecraft/world/level/material/FlowingFluid.java b/src/main/java/net/minecraft/world/level/material/FlowingFluid.java
-index bf9c228a19fe34221686f1d002feda7f40e8272c..e3b23cb01aa25afcef32ce87bb4aafa6e418f190 100644
+index bf9c228a19fe34221686f1d002feda7f40e8272c..be1664dd1b3c02a279de3951172989e5928765fb 100644
 --- a/src/main/java/net/minecraft/world/level/material/FlowingFluid.java
 +++ b/src/main/java/net/minecraft/world/level/material/FlowingFluid.java
-@@ -520,7 +520,7 @@ public abstract class FlowingFluid extends Fluid {
+@@ -520,10 +520,16 @@ public abstract class FlowingFluid extends Fluid {
          if (block instanceof LiquidBlockContainer ifluidcontainer) {
              return ifluidcontainer.canPlaceLiquid((Player) null, world, pos, state, fluid);
          } else {
 -            return !(block instanceof DoorBlock) && !state.is(BlockTags.SIGNS) && !state.is(Blocks.LADDER) && !state.is(Blocks.SUGAR_CANE) && !state.is(Blocks.BUBBLE_COLUMN) ? (!state.is(Blocks.NETHER_PORTAL) && !state.is(Blocks.END_PORTAL) && !state.is(Blocks.END_GATEWAY) && !state.is(Blocks.STRUCTURE_VOID) ? !state.blocksMotion() : false) : false;
-+            return state.canHoldFluidInternal(); // Leaf - Simplify canHoldFluid condition logic
++            return state.canHoldFluidInternal(); // Leaf - Cache canHoldFluid result
          }
      }
  
-diff --git a/src/main/java/org/dreeam/leaf/util/fluid/FluidUtil.java b/src/main/java/org/dreeam/leaf/util/fluid/FluidUtil.java
-new file mode 100644
-index 0000000000000000000000000000000000000000..de6744e5f11c394f4d64aab2bb94a81aa12432f2
---- /dev/null
-+++ b/src/main/java/org/dreeam/leaf/util/fluid/FluidUtil.java
-@@ -0,0 +1,30 @@
-+package org.dreeam.leaf.util.fluid;
-+
-+import net.minecraft.tags.BlockTags;
-+import net.minecraft.world.level.block.Block;
-+import net.minecraft.world.level.block.Blocks;
-+import net.minecraft.world.level.block.DoorBlock;
-+import net.minecraft.world.level.block.state.BlockState;
-+
-+public class FluidUtil {
-+
-+    public static boolean canHoldFluidInternal(Block block, BlockState state) {
-+        if (block instanceof DoorBlock ||
-+                state.is(BlockTags.SIGNS) ||
-+                block == Blocks.LADDER ||
-+                block == Blocks.SUGAR_CANE ||
-+                block == Blocks.BUBBLE_COLUMN) {
-+            return false;
-+        }
-+
-+        if (block == Blocks.NETHER_PORTAL ||
-+                block == Blocks.END_PORTAL ||
-+                block == Blocks.END_GATEWAY ||
-+                block == Blocks.STRUCTURE_VOID) {
-+            return false;
-+        }
-+
-+        // Same with !state.blocksMotion()
-+        return block == Blocks.COBWEB || block == Blocks.BAMBOO_SAPLING || !state.isSolid();
++    // Leaf start - Cache canHoldFluid result
++    public static boolean canHoldAnyFluidInternal(Block block, BlockState state) {
++        return !(block instanceof DoorBlock) && !state.is(BlockTags.SIGNS) && !state.is(Blocks.LADDER) && !state.is(Blocks.SUGAR_CANE) && !state.is(Blocks.BUBBLE_COLUMN) ? (!state.is(Blocks.NETHER_PORTAL) && !state.is(Blocks.END_PORTAL) && !state.is(Blocks.END_GATEWAY) && !state.is(Blocks.STRUCTURE_VOID) ? !state.blocksMotion() : false) : false;
 +    }
-+}
++    // Leaf end - Cache canHoldFluid result
++
+     protected boolean canSpreadTo(BlockGetter world, BlockPos fluidPos, BlockState fluidBlockState, Direction flowDirection, BlockPos flowTo, BlockState flowToBlockState, FluidState fluidState, Fluid fluid) {
+         return fluidState.canBeReplacedWith(world, flowTo, fluid, flowDirection) && this.canPassThroughWall(flowDirection, world, fluidPos, fluidBlockState, flowTo, flowToBlockState) && this.canHoldFluid(world, flowTo, flowToBlockState, fluid);
+     }
