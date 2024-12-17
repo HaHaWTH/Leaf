@@ -131,27 +131,26 @@ index 182e5cb7bb9b62e78248330bb05c79fb835df170..adf4732e57927810d34bf37fb3e9d2dc
                  this.disconnectAsync(Component.literal("Book too large!"), org.bukkit.event.player.PlayerKickEvent.Cause.ILLEGAL_ACTION); // Paper - kick event cause // Paper - add proper async disconnect
                  return;
 diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
-index b652bfd4aea7eca7eebc0265a518956eac8b7e73..39be345524b621e6ae2eec9af9d46da3291c671b 100644
+index b652bfd4aea7eca7eebc0265a518956eac8b7e73..c10e102ab63468a446b9a95d2d504ef154c4fbd7 100644
 --- a/src/main/java/net/minecraft/world/entity/Entity.java
 +++ b/src/main/java/net/minecraft/world/entity/Entity.java
-@@ -562,13 +562,29 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+@@ -562,13 +562,28 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
      // Purpur end
  
      // Purpur start - copied from Mob - API for any mob to burn daylight
-+    // Gale start - JettPack - optimize sun burn tick - cache eye blockpos - copied from Mob#isSunBurnTick
++    // Gale start - JettPack - optimize sun burn tick - cache eye blockpos
 +    private BlockPos cached_eye_blockpos;
-+    private int cached_position_hashcode;
-+    // Gale end - JettPack - optimize sun burn tick - cache eye blockpos - copied from Mob#isSunBurnTick
++    private net.minecraft.world.phys.Vec3 cached_position;
++    // Gale end - JettPack - optimize sun burn tick - cache eye blockpos
 +
      public boolean isSunBurnTick() {
          if (this.level().isDay() && !this.level().isClientSide) {
 -            float f = this.getLightLevelDependentMagicValue();
 -            BlockPos blockposition = BlockPos.containing(this.getX(), this.getEyeY(), this.getZ());
 +            // Gale start - JettPack - optimize sun burn tick - optimizations and cache eye blockpos - copied from Mob#isSunBurnTick
-+            int positionHashCode = this.position.hashCode();
-+            if (this.cached_position_hashcode != positionHashCode) {
++            if (this.cached_position != this.position) {
 +                this.cached_eye_blockpos = BlockPos.containing(this.getX(), this.getEyeY(), this.getZ());
-+                this.cached_position_hashcode = positionHashCode;
++                this.cached_position = this.position;
 +            }
 +
 +            float f = this.getLightLevelDependentMagicValue(cached_eye_blockpos); // Pass BlockPos to getBrightness
@@ -167,7 +166,7 @@ index b652bfd4aea7eca7eebc0265a518956eac8b7e73..39be345524b621e6ae2eec9af9d46da3
                  return true;
              }
          }
-@@ -874,7 +890,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+@@ -874,7 +889,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
      public void tick() {
          // Pufferfish start - entity TTL
          if (type != EntityType.PLAYER && type.ttl >= 0 && this.tickCount >= type.ttl) {
@@ -205,7 +204,7 @@ index 92b0e53ca1e154dde919502a99e82b16b3092450..64013ae4bdaabf10ac0dbbab8ccfa643
              // Purpur start
              if (entity instanceof LivingEntity entityliving) {
 diff --git a/src/main/java/net/minecraft/world/entity/Mob.java b/src/main/java/net/minecraft/world/entity/Mob.java
-index 78745bc7373c36a871ed9672b7fb4311f2ff3ebd..63b827d91a935d6b6f04266eea682da97af79cf2 100644
+index c1b844cbbdf0908b6ab5e261a0172965a8141c5f..63b827d91a935d6b6f04266eea682da97af79cf2 100644
 --- a/src/main/java/net/minecraft/world/entity/Mob.java
 +++ b/src/main/java/net/minecraft/world/entity/Mob.java
 @@ -705,7 +705,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
@@ -223,7 +222,7 @@ index 78745bc7373c36a871ed9672b7fb4311f2ff3ebd..63b827d91a935d6b6f04266eea682da9
  
 -    // Gale start - JettPack - optimize sun burn tick - cache eye blockpos
 -    private BlockPos cached_eye_blockpos;
--    private int cached_position_hashcode;
+-    private net.minecraft.world.phys.Vec3 cached_position;
 -    // Gale end - JettPack - optimize sun burn tick - cache eye blockpos
 -
      public boolean isSunBurnTick() {
@@ -289,19 +288,6 @@ index 6c68c1df84e006f9992435f4c8e328c17e88c51c..f86f42863227494f7f71a7813fd49049
  
      @Override
      protected void registerGoals() {
-diff --git a/src/main/java/net/minecraft/world/entity/npc/VillagerProfession.java b/src/main/java/net/minecraft/world/entity/npc/VillagerProfession.java
-index 3ca83269311cbc18c9ef3ce62cff6a2d4dc0a683..a636ab87d21c67b152b40b77e62fa8043ca4211e 100644
---- a/src/main/java/net/minecraft/world/entity/npc/VillagerProfession.java
-+++ b/src/main/java/net/minecraft/world/entity/npc/VillagerProfession.java
-@@ -31,7 +31,7 @@ public record VillagerProfession(
-     public static final VillagerProfession ARMORER = register("armorer", PoiTypes.ARMORER, SoundEvents.VILLAGER_WORK_ARMORER);
-     public static final VillagerProfession BUTCHER = register("butcher", PoiTypes.BUTCHER, SoundEvents.VILLAGER_WORK_BUTCHER);
-     public static final VillagerProfession CARTOGRAPHER = register("cartographer", PoiTypes.CARTOGRAPHER, SoundEvents.VILLAGER_WORK_CARTOGRAPHER);
--    public static final VillagerProfession CLERIC = register("cleric", PoiTypes.CLERIC, ImmutableSet.of(Items.NETHER_WART), ImmutableSet.of(Blocks.SOUL_SAND), SoundEvents.VILLAGER_WORK_CLERIC); // Purpur
-+    public static final VillagerProfession CLERIC = register("cleric", PoiTypes.CLERIC, new Item[] {Items.NETHER_WART}, Blocks.SOUL_SAND, SoundEvents.VILLAGER_WORK_CLERIC); // Purpur // Leaf - sync with Gale's Optimize-villager-data-storage.patch
-     public static final VillagerProfession FARMER = register(
-         "farmer",
-         PoiTypes.FARMER,
 diff --git a/src/main/java/net/minecraft/world/entity/projectile/Projectile.java b/src/main/java/net/minecraft/world/entity/projectile/Projectile.java
 index 0f143ed6b3448c8d40eb79dfe19b3d9e4e68d853..cbd510df8f1b886d1c40f431cb236d73f83417b9 100644
 --- a/src/main/java/net/minecraft/world/entity/projectile/Projectile.java

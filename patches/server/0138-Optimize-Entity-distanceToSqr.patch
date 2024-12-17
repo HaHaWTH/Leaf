@@ -8,10 +8,10 @@ avoids multiple casting in Entity#distanceTo, using Math#sqrt directly instead o
 these methods more able to be inlined by the JIT compiler.
 
 diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
-index c4965b7582edfdf97cac82c1472f8fcc1a880a6b..d55560a12be8846db7c0969f5e72f3d79bf0d9c4 100644
+index dc9ad6d6a8dd93056ce5acc1836eb619d8973ba6..52a44835dc84bfb8dc80e9b9e17403e6b1a2cb09 100644
 --- a/src/main/java/net/minecraft/world/entity/Entity.java
 +++ b/src/main/java/net/minecraft/world/entity/Entity.java
-@@ -2370,33 +2370,41 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+@@ -2369,33 +2369,41 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
          this.xRotO = this.getXRot();
      }
  
@@ -69,7 +69,7 @@ index c4965b7582edfdf97cac82c1472f8fcc1a880a6b..d55560a12be8846db7c0969f5e72f3d7
      public void playerTouch(Player player) {}
  
 diff --git a/src/main/java/org/dreeam/leaf/LeafBootstrap.java b/src/main/java/org/dreeam/leaf/LeafBootstrap.java
-index 0052062cdfcb7672bec177c3d3788f7b1a56d3e5..fbfcb237996674c26d2eff0075c1aa8a447ad2a4 100644
+index ff0ef887b892caa1451b5781d95f5505cfa2e413..0a0aa335e6c6992a89defde5ef1b23ab19b2df48 100644
 --- a/src/main/java/org/dreeam/leaf/LeafBootstrap.java
 +++ b/src/main/java/org/dreeam/leaf/LeafBootstrap.java
 @@ -4,6 +4,7 @@ import io.papermc.paper.PaperBootstrap;

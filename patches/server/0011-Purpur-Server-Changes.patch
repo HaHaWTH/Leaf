@@ -2886,7 +2886,7 @@ index 914c5bbcd088d0f7fd5626310cdbcd163565143a..92b0e53ca1e154dde919502a99e82b16
          return slot != EquipmentSlot.HEAD && slot != EquipmentSlot.MAINHAND && slot != EquipmentSlot.OFFHAND ? SlotAccess.forEquipmentSlot(entity, slot, (itemstack) -> {
              return itemstack.isEmpty() || entity.getEquipmentSlotForItem(itemstack) == slot;
 diff --git a/src/main/java/net/minecraft/world/entity/Mob.java b/src/main/java/net/minecraft/world/entity/Mob.java
-index aa6d06c5b873ae92d7de6c091a8b9d27221ef7f8..78745bc7373c36a871ed9672b7fb4311f2ff3ebd 100644
+index f413f603a1c368bb74c0c49e69e8db9516a9cb76..c1b844cbbdf0908b6ab5e261a0172965a8141c5f 100644
 --- a/src/main/java/net/minecraft/world/entity/Mob.java
 +++ b/src/main/java/net/minecraft/world/entity/Mob.java
 @@ -145,6 +145,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
@@ -3001,16 +3001,15 @@ index aa6d06c5b873ae92d7de6c091a8b9d27221ef7f8..78745bc7373c36a871ed9672b7fb4311
          return flag;
      }
  
-@@ -1738,28 +1768,8 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
+@@ -1738,27 +1768,8 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
      // Gale end - JettPack - optimize sun burn tick - cache eye blockpos
  
      public boolean isSunBurnTick() {
 -        if (this.level().isDay() && !this.level().isClientSide) {
 -            // Gale start - JettPack - optimize sun burn tick - optimizations and cache eye blockpos
--            int positionHashCode = this.position.hashCode();
--            if (this.cached_position_hashcode != positionHashCode) {
+-            if (this.cached_position != this.position) {
 -                this.cached_eye_blockpos = BlockPos.containing(this.getX(), this.getEyeY(), this.getZ());
--                this.cached_position_hashcode = positionHashCode;
+-                this.cached_position = this.position;
 -            }
 -
 -            float f = this.getLightLevelDependentMagicValue(cached_eye_blockpos); // Pass BlockPos to getBrightness
@@ -3032,7 +3031,7 @@ index aa6d06c5b873ae92d7de6c091a8b9d27221ef7f8..78745bc7373c36a871ed9672b7fb4311
      }
  
      @Override
-@@ -1802,4 +1812,56 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
+@@ -1801,4 +1812,56 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
  
          return itemmonsteregg == null ? null : new ItemStack(itemmonsteregg);
      }

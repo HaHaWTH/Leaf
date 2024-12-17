@@ -13,10 +13,10 @@ This is Dreeam's tiny modified version, should be around 1~2+ times faster.
 Retrieve blocks more efficiently
 
 diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
-index 39be345524b621e6ae2eec9af9d46da3291c671b..db0133b8e5e4e26d3f5ca48f87d6d49f8cff0532 100644
+index c10e102ab63468a446b9a95d2d504ef154c4fbd7..6c19d2b1c5fe8815a2f82d5807d83265f6d94630 100644
 --- a/src/main/java/net/minecraft/world/entity/Entity.java
 +++ b/src/main/java/net/minecraft/world/entity/Entity.java
-@@ -1718,6 +1718,87 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+@@ -1717,6 +1717,87 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
      // CraftBukkit end
  
      protected void checkInsideBlocks() {
