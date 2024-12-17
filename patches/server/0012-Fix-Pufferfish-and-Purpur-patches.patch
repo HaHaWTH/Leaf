@@ -92,7 +92,7 @@ index 096c89bd01cec2abd151bf6fffc4847d1bcd548f..cd0a8a6a1be75cab8bbb8ee3ac17bb73
          this.values[this.vp++ & 0xFF] = (int)(l * 100L / Runtime.getRuntime().maxMemory());
          this.repaint();
 diff --git a/src/main/java/net/minecraft/server/level/ServerChunkCache.java b/src/main/java/net/minecraft/server/level/ServerChunkCache.java
-index 01ea21b960b5b32cdb14cefd1c23b50ba5cb8335..e8a89db44ed4f20516a9716bc3f41658f63a312c 100644
+index e9d307dacea2f9b11cda5ecf5a06c7df09d1de90..8e7c2e82b5fce1944db58a0031aea40dbddb7057 100644
 --- a/src/main/java/net/minecraft/server/level/ServerChunkCache.java
 +++ b/src/main/java/net/minecraft/server/level/ServerChunkCache.java
 @@ -486,7 +486,7 @@ public class ServerChunkCache extends ChunkSource implements ca.spottedleaf.moon
@@ -229,29 +229,8 @@ index 78745bc7373c36a871ed9672b7fb4311f2ff3ebd..63b827d91a935d6b6f04266eea682da9
      public boolean isSunBurnTick() {
          // Purpur - implemented in Entity - API for any mob to burn daylight
          return super.isSunBurnTick();
-diff --git a/src/main/java/net/minecraft/world/entity/ai/behavior/TradeWithVillager.java b/src/main/java/net/minecraft/world/entity/ai/behavior/TradeWithVillager.java
-index b96e596fb123f5b69d2b2f5b4a65537beaab33e6..0f6ff2fb3c5df42a44e5082c2408d5262c187870 100644
---- a/src/main/java/net/minecraft/world/entity/ai/behavior/TradeWithVillager.java
-+++ b/src/main/java/net/minecraft/world/entity/ai/behavior/TradeWithVillager.java
-@@ -21,6 +21,7 @@ public class TradeWithVillager extends Behavior<Villager> {
-     private static final Item[] WHEAT_SINGLETON_ARRAY = {Items.WHEAT};
-     private @org.jetbrains.annotations.NotNull Item @org.jetbrains.annotations.Nullable [] trades = null;
-     // Gale end - optimize villager data storage
-+    private static final Item[] NETHER_WART_SINGLETON_ARRAY = {Items.NETHER_WART}; // Leaf - sync with Gale's Optimize-villager-data-storage.patch
- 
-     public TradeWithVillager() {
-         super(
-@@ -64,7 +65,7 @@ public class TradeWithVillager extends Behavior<Villager> {
- 
-             // Purpur start
-             if (world.purpurConfig.villagerClericsFarmWarts && world.purpurConfig.villagerClericFarmersThrowWarts && entity.getVillagerData().getProfession() == VillagerProfession.CLERIC && entity.getInventory().countItem(Items.NETHER_WART) > Items.NETHER_WART.getDefaultMaxStackSize() / 2) {
--                throwHalfStack(entity, ImmutableSet.of(Items.NETHER_WART), villager);
-+                throwHalfStack(entity, NETHER_WART_SINGLETON_ARRAY, villager); // Leaf - sync with Gale's Optimize-villager-data-storage.patch
-             }
-             // Purpur end
- 
 diff --git a/src/main/java/net/minecraft/world/entity/ai/sensing/SecondaryPoiSensor.java b/src/main/java/net/minecraft/world/entity/ai/sensing/SecondaryPoiSensor.java
-index 675126d9ab94b6c69d0436a42b9594a567aca6e4..67f16bd710e0c04b4e2dac2c2cf5862853f3f4f4 100644
+index d548d1b2686667d809f363cd0ae4444bc3918bf2..c3519eb6b28d180c9a5bf673037f1c4324ba5685 100644
 --- a/src/main/java/net/minecraft/world/entity/ai/sensing/SecondaryPoiSensor.java
 +++ b/src/main/java/net/minecraft/world/entity/ai/sensing/SecondaryPoiSensor.java
 @@ -22,19 +22,15 @@ public class SecondaryPoiSensor extends Sensor<Villager> {
@@ -261,7 +240,7 @@ index 675126d9ab94b6c69d0436a42b9594a567aca6e4..67f16bd710e0c04b4e2dac2c2cf58628
 +        // Purpur start - make sure clerics don't wander to soul sand when the option is off
          // Gale start - Lithium - skip secondary POI sensor if absent
          var secondaryPoi = entity.getVillagerData().getProfession().secondaryPoi();
--        if (secondaryPoi == null) { // Gale - optimize villager data storage
+-        if (secondaryPoi.isEmpty()) {
 -            entity.getBrain().eraseMemory(MemoryModuleType.SECONDARY_JOB_SITE);
 -            return;
 -        }
@@ -269,7 +248,7 @@ index 675126d9ab94b6c69d0436a42b9594a567aca6e4..67f16bd710e0c04b4e2dac2c2cf58628
 -        // Purpur start - make sure clerics don't wander to soul sand when the option is off
          Brain<?> brain = entity.getBrain();
 -        if (!world.purpurConfig.villagerClericsFarmWarts && entity.getVillagerData().getProfession() == net.minecraft.world.entity.npc.VillagerProfession.CLERIC) {
-+        if (secondaryPoi == null || (!world.purpurConfig.villagerClericsFarmWarts && entity.getVillagerData().getProfession() == net.minecraft.world.entity.npc.VillagerProfession.CLERIC)) {
++        if (secondaryPoi.isEmpty() || (!world.purpurConfig.villagerClericsFarmWarts && entity.getVillagerData().getProfession() == net.minecraft.world.entity.npc.VillagerProfession.CLERIC)) {
              brain.eraseMemory(MemoryModuleType.SECONDARY_JOB_SITE);
              return;
          }
@@ -311,7 +290,7 @@ index 6c68c1df84e006f9992435f4c8e328c17e88c51c..f86f42863227494f7f71a7813fd49049
      @Override
      protected void registerGoals() {
 diff --git a/src/main/java/net/minecraft/world/entity/npc/VillagerProfession.java b/src/main/java/net/minecraft/world/entity/npc/VillagerProfession.java
-index 67ede6b9d6ff2953f155f50c0e92c517ee02c65f..759d808ee73dfb480d91ae6f17dc56f4ad0b0a20 100644
+index 3ca83269311cbc18c9ef3ce62cff6a2d4dc0a683..a636ab87d21c67b152b40b77e62fa8043ca4211e 100644
 --- a/src/main/java/net/minecraft/world/entity/npc/VillagerProfession.java
 +++ b/src/main/java/net/minecraft/world/entity/npc/VillagerProfession.java
 @@ -31,7 +31,7 @@ public record VillagerProfession(

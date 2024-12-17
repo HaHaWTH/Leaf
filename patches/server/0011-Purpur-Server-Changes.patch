@@ -3289,11 +3289,11 @@ index 18dad0825616c4167a0a7555689ee64910a87e09..6945992491027d43eca4f1ca697ad45c
              && this.lookTime > 0
              && entity.getBrain().getMemory(MemoryModuleType.INTERACTION_TARGET).isPresent();
 diff --git a/src/main/java/net/minecraft/world/entity/ai/behavior/TradeWithVillager.java b/src/main/java/net/minecraft/world/entity/ai/behavior/TradeWithVillager.java
-index 90ae43979e05839d676ab51feb489955ecbee50e..1acf55dd527ac06a46f7e29a720ec53565ddcb9d 100644
+index 8508ac7de8cda3127b73e11ff4aee62502e65ead..b1544e028d5a9b84b944e1fb5a12bb163067fb54 100644
 --- a/src/main/java/net/minecraft/world/entity/ai/behavior/TradeWithVillager.java
 +++ b/src/main/java/net/minecraft/world/entity/ai/behavior/TradeWithVillager.java
-@@ -62,6 +62,12 @@ public class TradeWithVillager extends Behavior<Villager> {
-                 throwHalfStack(entity, WHEAT_SINGLETON_ARRAY, villager); // Gale - optimize villager data storage
+@@ -59,6 +59,12 @@ public class TradeWithVillager extends Behavior<Villager> {
+                 throwHalfStack(entity, ImmutableSet.of(Items.WHEAT), villager);
              }
  
 +            // Purpur start
@@ -3302,9 +3302,9 @@ index 90ae43979e05839d676ab51feb489955ecbee50e..1acf55dd527ac06a46f7e29a720ec535
 +            }
 +            // Purpur end
 +
-             // Gale start - optimize villager data storage
-             if (this.trades != null && entity.getInventory().hasAnyOf(this.trades)) {
+             if (!this.trades.isEmpty() && entity.getInventory().hasAnyOf(this.trades)) {
                  throwHalfStack(entity, this.trades, villager);
+             }
 diff --git a/src/main/java/net/minecraft/world/entity/ai/behavior/VillagerGoalPackages.java b/src/main/java/net/minecraft/world/entity/ai/behavior/VillagerGoalPackages.java
 index f000a6c1e61198e6dd06ae5f084d12fdf309f50a..3091d985ba9c55d404332576320718840538722e 100644
 --- a/src/main/java/net/minecraft/world/entity/ai/behavior/VillagerGoalPackages.java
@@ -3515,7 +3515,7 @@ index 92731b6b593289e9f583c9b705b219e81fcd8e73..9104d7010bda6f9f73b478c11490ef9c
              // Paper end - optimise POI access
              if (path != null && path.canReach()) {
 diff --git a/src/main/java/net/minecraft/world/entity/ai/sensing/SecondaryPoiSensor.java b/src/main/java/net/minecraft/world/entity/ai/sensing/SecondaryPoiSensor.java
-index 8bed5992f639f805ccdec56a90101004570dc265..675126d9ab94b6c69d0436a42b9594a567aca6e4 100644
+index 1595568f3140a62b0f2236644ac2da11db12af05..d548d1b2686667d809f363cd0ae4444bc3918bf2 100644
 --- a/src/main/java/net/minecraft/world/entity/ai/sensing/SecondaryPoiSensor.java
 +++ b/src/main/java/net/minecraft/world/entity/ai/sensing/SecondaryPoiSensor.java
 @@ -29,6 +29,13 @@ public class SecondaryPoiSensor extends Sensor<Villager> {
@@ -3531,16 +3531,16 @@ index 8bed5992f639f805ccdec56a90101004570dc265..675126d9ab94b6c69d0436a42b9594a5
 +        // Purpur end
          ResourceKey<Level> resourceKey = world.dimension();
          BlockPos blockPos = entity.blockPosition();
-         @org.jetbrains.annotations.Nullable java.util.ArrayList<GlobalPos> list = null; // Gale - optimize villager data storage
-@@ -50,7 +57,7 @@ public class SecondaryPoiSensor extends Sensor<Villager> {
+         List<GlobalPos> list = Lists.newArrayList();
+@@ -45,7 +52,7 @@ public class SecondaryPoiSensor extends Sensor<Villager> {
              }
          }
  
 -        Brain<?> brain = entity.getBrain();
 +        //Brain<?> brain = entity.getBrain(); // Purpur - moved up
-         // Gale start - optimize villager data storage
-         if (list != null) {
-             list.trimToSize();
+         if (!list.isEmpty()) {
+             brain.setMemory(MemoryModuleType.SECONDARY_JOB_SITE, list);
+         } else {
 diff --git a/src/main/java/net/minecraft/world/entity/ai/targeting/TargetingConditions.java b/src/main/java/net/minecraft/world/entity/ai/targeting/TargetingConditions.java
 index 4addcfe248dd4705be7e67551b258ce86c57e194..82d3e442f6d31211701878fc5ae7a346247ef124 100644
 --- a/src/main/java/net/minecraft/world/entity/ai/targeting/TargetingConditions.java
@@ -12147,10 +12147,10 @@ index e0e5046c84941a8d17e18c177f3daea9cb631940..d503d7a5837dbeb98e58dbe8f7e5de45
      }
  
 diff --git a/src/main/java/net/minecraft/world/entity/npc/Villager.java b/src/main/java/net/minecraft/world/entity/npc/Villager.java
-index e1fd6ad56c0fbaf59c9d9ac985ab5301d768f9ba..92e81a7092e594d1fbe2b239af363739fbba881a 100644
+index c96d612f0b3efc96f3f60f35449811cacc93123c..6d8f0effc3143946eebbdb7e0a1a46ed2864df4a 100644
 --- a/src/main/java/net/minecraft/world/entity/npc/Villager.java
 +++ b/src/main/java/net/minecraft/world/entity/npc/Villager.java
-@@ -143,6 +143,8 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
+@@ -142,6 +142,8 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
      }, MemoryModuleType.MEETING_POINT, (entityvillager, holder) -> {
          return holder.is(PoiTypes.MEETING);
      });
@@ -12159,7 +12159,7 @@ index e1fd6ad56c0fbaf59c9d9ac985ab5301d768f9ba..92e81a7092e594d1fbe2b239af363739
  
      public long nextGolemPanic = -1; // Pufferfish
  
-@@ -157,6 +159,92 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
+@@ -156,6 +158,92 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
          this.getNavigation().setCanFloat(true);
          this.setCanPickUpLoot(true);
          this.setVillagerData(this.getVillagerData().setType(type).setProfession(VillagerProfession.NONE));
@@ -12252,7 +12252,7 @@ index e1fd6ad56c0fbaf59c9d9ac985ab5301d768f9ba..92e81a7092e594d1fbe2b239af363739
      }
  
      @Override
-@@ -193,7 +281,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
+@@ -192,7 +280,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
              brain.addActivity(Activity.PLAY, VillagerGoalPackages.getPlayPackage(0.5F));
          } else {
              brain.setSchedule(Schedule.VILLAGER_DEFAULT);
@@ -12261,7 +12261,7 @@ index e1fd6ad56c0fbaf59c9d9ac985ab5301d768f9ba..92e81a7092e594d1fbe2b239af363739
          }
  
          brain.addActivity(Activity.CORE, VillagerGoalPackages.getCorePackage(villagerprofession, 0.5F));
-@@ -256,12 +344,21 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
+@@ -255,12 +343,21 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
          // Paper start
          this.customServerAiStep(false);
      }
@@ -12285,7 +12285,7 @@ index e1fd6ad56c0fbaf59c9d9ac985ab5301d768f9ba..92e81a7092e594d1fbe2b239af363739
          // Pufferfish end
          if (this.assignProfessionWhenSpawned) {
              this.assignProfessionWhenSpawned = false;
-@@ -318,7 +415,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
+@@ -317,7 +414,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
          if (!itemstack.is(Items.VILLAGER_SPAWN_EGG) && this.isAlive() && !this.isTrading() && !this.isSleeping()) {
              if (this.isBaby()) {
                  this.setUnhappy();
@@ -12294,7 +12294,7 @@ index e1fd6ad56c0fbaf59c9d9ac985ab5301d768f9ba..92e81a7092e594d1fbe2b239af363739
              } else {
                  if (!this.level().isClientSide) {
                      boolean flag = this.getOffers().isEmpty();
-@@ -332,9 +429,11 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
+@@ -331,9 +428,11 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
                      }
  
                      if (flag) {
@@ -12307,7 +12307,7 @@ index e1fd6ad56c0fbaf59c9d9ac985ab5301d768f9ba..92e81a7092e594d1fbe2b239af363739
                      this.startTrading(player);
                  }
  
-@@ -504,7 +603,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
+@@ -503,7 +602,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
          while (iterator.hasNext()) {
              MerchantOffer merchantrecipe = (MerchantOffer) iterator.next();
  
@@ -12316,7 +12316,7 @@ index e1fd6ad56c0fbaf59c9d9ac985ab5301d768f9ba..92e81a7092e594d1fbe2b239af363739
          }
  
      }
-@@ -746,7 +845,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
+@@ -745,7 +844,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
  
      @Override
      public boolean canBreed() {
@@ -12325,7 +12325,7 @@ index e1fd6ad56c0fbaf59c9d9ac985ab5301d768f9ba..92e81a7092e594d1fbe2b239af363739
      }
  
      private boolean hungry() {
-@@ -960,6 +1059,11 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
+@@ -938,6 +1037,11 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
  
      public boolean hasFarmSeeds() {
          return this.getInventory().hasAnyMatching((itemstack) -> {
@@ -12337,7 +12337,7 @@ index e1fd6ad56c0fbaf59c9d9ac985ab5301d768f9ba..92e81a7092e594d1fbe2b239af363739
              return itemstack.is(ItemTags.VILLAGER_PLANTABLE_SEEDS);
          });
      }
-@@ -1017,6 +1121,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
+@@ -995,6 +1099,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
      }
  
      public void spawnGolemIfNeeded(ServerLevel world, long time, int requiredCount) {
@@ -12345,7 +12345,7 @@ index e1fd6ad56c0fbaf59c9d9ac985ab5301d768f9ba..92e81a7092e594d1fbe2b239af363739
          if (this.wantsToSpawnGolem(time)) {
              AABB axisalignedbb = this.getBoundingBox().inflate(10.0D, 10.0D, 10.0D);
              List<Villager> list = world.getEntitiesOfClass(Villager.class, axisalignedbb);
-@@ -1081,6 +1186,12 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
+@@ -1059,6 +1164,12 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
  
      @Override
      public void startSleeping(BlockPos pos) {
@@ -12359,7 +12359,7 @@ index e1fd6ad56c0fbaf59c9d9ac985ab5301d768f9ba..92e81a7092e594d1fbe2b239af363739
          this.brain.setMemory(MemoryModuleType.LAST_SLEPT, this.level().getGameTime()); // CraftBukkit - decompile error
          this.brain.eraseMemory(MemoryModuleType.WALK_TARGET);
 diff --git a/src/main/java/net/minecraft/world/entity/npc/VillagerProfession.java b/src/main/java/net/minecraft/world/entity/npc/VillagerProfession.java
-index fa84a4b23a52e60a61c2ee32c1ea449f6dbe0d2b..67ede6b9d6ff2953f155f50c0e92c517ee02c65f 100644
+index 8734ab1bd8299bbf43906d81a349c2a13e0981a7..3ca83269311cbc18c9ef3ce62cff6a2d4dc0a683 100644
 --- a/src/main/java/net/minecraft/world/entity/npc/VillagerProfession.java
 +++ b/src/main/java/net/minecraft/world/entity/npc/VillagerProfession.java
 @@ -31,7 +31,7 @@ public record VillagerProfession(

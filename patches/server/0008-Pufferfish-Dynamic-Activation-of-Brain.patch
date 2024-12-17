@@ -260,10 +260,10 @@ index 1cb55c9240dfa46cf117ac5b8923b064a96788c3..37e682452ecc30646faf1ae8da47f917
          super.customServerAiStep();
          if ((this.tickCount + this.getId()) % 120 == 0) {
 diff --git a/src/main/java/net/minecraft/world/entity/npc/Villager.java b/src/main/java/net/minecraft/world/entity/npc/Villager.java
-index 491a4c38cbb393c1a565d75a87c0444e321938c0..e1fd6ad56c0fbaf59c9d9ac985ab5301d768f9ba 100644
+index ba49442ed0b7c05c50dbc2a640f5759e391902f2..c96d612f0b3efc96f3f60f35449811cacc93123c 100644
 --- a/src/main/java/net/minecraft/world/entity/npc/Villager.java
 +++ b/src/main/java/net/minecraft/world/entity/npc/Villager.java
-@@ -144,6 +144,8 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
+@@ -143,6 +143,8 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
          return holder.is(PoiTypes.MEETING);
      });
  
@@ -272,7 +272,7 @@ index 491a4c38cbb393c1a565d75a87c0444e321938c0..e1fd6ad56c0fbaf59c9d9ac985ab5301
      public Villager(EntityType<? extends Villager> entityType, Level world) {
          this(entityType, world, VillagerType.PLAINS);
      }
-@@ -247,6 +249,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
+@@ -246,6 +248,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
      }
      // Spigot End
  
@@ -280,7 +280,7 @@ index 491a4c38cbb393c1a565d75a87c0444e321938c0..e1fd6ad56c0fbaf59c9d9ac985ab5301
      @Override
      @Deprecated // Paper
      protected void customServerAiStep() {
-@@ -255,7 +258,11 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
+@@ -254,7 +257,11 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
      }
      protected void customServerAiStep(final boolean inactive) {
          // Paper end
