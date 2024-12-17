@@ -202,9 +202,18 @@ index 70b247cd559cb9814fbf8e3ab7839a40488dbef1..991859906cf1278663ba75bf0992f002
              }
  
 diff --git a/src/main/java/net/minecraft/server/level/ServerPlayer.java b/src/main/java/net/minecraft/server/level/ServerPlayer.java
-index b2ae3fdf128e7d66e3f3430266321a6a09fa0be6..7c6bda95b8b08cc70182f19cf0b991f78d28c235 100644
+index b2ae3fdf128e7d66e3f3430266321a6a09fa0be6..e36358d0217a181b101c7dfbb3ea265fd15597c1 100644
 --- a/src/main/java/net/minecraft/server/level/ServerPlayer.java
 +++ b/src/main/java/net/minecraft/server/level/ServerPlayer.java
+@@ -212,7 +212,7 @@ public class ServerPlayer extends net.minecraft.world.entity.player.Player imple
+     private static final AttributeModifier CREATIVE_ENTITY_INTERACTION_RANGE_MODIFIER = new AttributeModifier(ResourceLocation.withDefaultNamespace("creative_mode_entity_range"), 2.0D, AttributeModifier.Operation.ADD_VALUE);
+     public ServerGamePacketListenerImpl connection;
+     public final MinecraftServer server;
+-    public final ServerPlayerGameMode gameMode;
++    public ServerPlayerGameMode gameMode; // Leaves - final -> null
+     private final PlayerAdvancements advancements;
+     private final ServerStatsCounter stats;
+     private float lastRecordedHealthAndAbsorption = Float.MIN_VALUE;
 @@ -425,7 +425,7 @@ public class ServerPlayer extends net.minecraft.world.entity.player.Player imple
              public void dataChanged(AbstractContainerMenu handler, int property, int value) {}
          };
@@ -476,10 +485,10 @@ index 75f1e56281014a8fc7e682478307d8f40ad4bdcc..8addddffe97751524f265241ac644a92
      @Override
 diff --git a/src/main/java/org/leavesmc/leaves/bot/BotStatsCounter.java b/src/main/java/org/leavesmc/leaves/bot/BotStatsCounter.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..1dfbda8b2439e3f21fea953292aa0e3e853b22e0
+index 0000000000000000000000000000000000000000..10494446f915bc1720a18cfe75b2cab2404646e9
 --- /dev/null
 +++ b/src/main/java/org/leavesmc/leaves/bot/BotStatsCounter.java
-@@ -0,0 +1,38 @@
+@@ -0,0 +1,36 @@
 +package org.leavesmc.leaves.bot;
 +
 +import com.mojang.datafixers.DataFixer;
@@ -487,6 +496,7 @@ index 0000000000000000000000000000000000000000..1dfbda8b2439e3f21fea953292aa0e3e
 +import net.minecraft.stats.ServerStatsCounter;
 +import net.minecraft.stats.Stat;
 +import net.minecraft.world.entity.player.Player;
++import org.jetbrains.annotations.NotNull;
 +
 +import java.io.File;
 +
@@ -500,28 +510,24 @@ index 0000000000000000000000000000000000000000..1dfbda8b2439e3f21fea953292aa0e3e
 +
 +    @Override
 +    public void save() {
-+
 +    }
 +
 +    @Override
-+    public void setValue(Player player, Stat<?> stat, int value) {
-+
++    public void setValue(@NotNull Player player, @NotNull Stat<?> stat, int value) {
 +    }
 +
 +    @Override
-+    public void parseLocal(DataFixer dataFixer, String json) {
-+
++    public void parseLocal(@NotNull DataFixer dataFixer, @NotNull String json) {
 +    }
 +
 +    @Override
-+    public int getValue(Stat<?> stat) {
++    public int getValue(@NotNull Stat<?> stat) {
 +        return 0;
 +    }
 +}
-\ No newline at end of file
 diff --git a/src/main/java/org/leavesmc/leaves/entity/CraftPhotographer.java b/src/main/java/org/leavesmc/leaves/entity/CraftPhotographer.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..23c2f699f3ae12d1a36efc7860e869facea9c175
+index 0000000000000000000000000000000000000000..fed2005cb711d0d15d5c87e5f0f7939c7a6a8ffa
 --- /dev/null
 +++ b/src/main/java/org/leavesmc/leaves/entity/CraftPhotographer.java
 @@ -0,0 +1,73 @@
@@ -598,10 +604,9 @@ index 0000000000000000000000000000000000000000..23c2f699f3ae12d1a36efc7860e869fa
 +        return "CraftPhotographer{" + "name=" + getName() + '}';
 +    }
 +}
-\ No newline at end of file
 diff --git a/src/main/java/org/leavesmc/leaves/entity/CraftPhotographerManager.java b/src/main/java/org/leavesmc/leaves/entity/CraftPhotographerManager.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..b1bbe2127a8673c4ca82473e11c9c0130a037d64
+index 0000000000000000000000000000000000000000..26ded0a644c0071c983b1d9cf0564f8843de75d7
 --- /dev/null
 +++ b/src/main/java/org/leavesmc/leaves/entity/CraftPhotographerManager.java
 @@ -0,0 +1,83 @@
@@ -688,10 +693,9 @@ index 0000000000000000000000000000000000000000..b1bbe2127a8673c4ca82473e11c9c013
 +        return photographerViews;
 +    }
 +}
-\ No newline at end of file
 diff --git a/src/main/java/org/leavesmc/leaves/replay/DigestOutputStream.java b/src/main/java/org/leavesmc/leaves/replay/DigestOutputStream.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..ffb753377aea3a2c9fd653da8245d5e733fee0cf
+index 0000000000000000000000000000000000000000..e67ff063b7f50b4bfdaaaeb88f225eb768d89623
 --- /dev/null
 +++ b/src/main/java/org/leavesmc/leaves/replay/DigestOutputStream.java
 @@ -0,0 +1,46 @@
@@ -741,10 +745,9 @@ index 0000000000000000000000000000000000000000..ffb753377aea3a2c9fd653da8245d5e7
 +        out.write(b, off, len);
 +    }
 +}
-\ No newline at end of file
 diff --git a/src/main/java/org/leavesmc/leaves/replay/RecordMetaData.java b/src/main/java/org/leavesmc/leaves/replay/RecordMetaData.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..f6b9d5d47dd957d30f725c2daad596226e21af32
+index 0000000000000000000000000000000000000000..5a3ea3e1e8df362262e1beaac167d667bd10adfa
 --- /dev/null
 +++ b/src/main/java/org/leavesmc/leaves/replay/RecordMetaData.java
 @@ -0,0 +1,23 @@
@@ -771,10 +774,9 @@ index 0000000000000000000000000000000000000000..f6b9d5d47dd957d30f725c2daad59622
 +
 +    public Set<UUID> players = new HashSet<>();
 +}
-\ No newline at end of file
 diff --git a/src/main/java/org/leavesmc/leaves/replay/Recorder.java b/src/main/java/org/leavesmc/leaves/replay/Recorder.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..255261aa57780e622b7f4026c6f0ec0402eaee53
+index 0000000000000000000000000000000000000000..4d34bcb18c8feb327f1d4a2007dcd1efc2aa5169
 --- /dev/null
 +++ b/src/main/java/org/leavesmc/leaves/replay/Recorder.java
 @@ -0,0 +1,288 @@
@@ -1066,10 +1068,9 @@ index 0000000000000000000000000000000000000000..255261aa57780e622b7f4026c6f0ec04
 +        }
 +    }
 +}
-\ No newline at end of file
 diff --git a/src/main/java/org/leavesmc/leaves/replay/RecorderOption.java b/src/main/java/org/leavesmc/leaves/replay/RecorderOption.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..7183f7fc3eb4fc12aa90b94661b652f476de396b
+index 0000000000000000000000000000000000000000..e1c32a60fa60054b351b0f4267d2e3e20c129e9b
 --- /dev/null
 +++ b/src/main/java/org/leavesmc/leaves/replay/RecorderOption.java
 @@ -0,0 +1,57 @@
@@ -1130,10 +1131,9 @@ index 0000000000000000000000000000000000000000..7183f7fc3eb4fc12aa90b94661b652f4
 +        }
 +    }
 +}
-\ No newline at end of file
 diff --git a/src/main/java/org/leavesmc/leaves/replay/ReplayFile.java b/src/main/java/org/leavesmc/leaves/replay/ReplayFile.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..f41657d4796a6bf60665d1ba4c1a8f9295a2e1d5
+index 0000000000000000000000000000000000000000..fa567977970288e0642745f186a4231e5840220c
 --- /dev/null
 +++ b/src/main/java/org/leavesmc/leaves/replay/ReplayFile.java
 @@ -0,0 +1,199 @@
@@ -1336,10 +1336,9 @@ index 0000000000000000000000000000000000000000..f41657d4796a6bf60665d1ba4c1a8f92
 +        return dir.delete();
 +    }
 +}
-\ No newline at end of file
 diff --git a/src/main/java/org/leavesmc/leaves/replay/ReplayMarker.java b/src/main/java/org/leavesmc/leaves/replay/ReplayMarker.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..219b9ea88f8cebaf8aab73b123d3efd586cc3147
+index 0000000000000000000000000000000000000000..1568f6928d5d4f38ca1919c6de6ec9bb9deb20b2
 --- /dev/null
 +++ b/src/main/java/org/leavesmc/leaves/replay/ReplayMarker.java
 @@ -0,0 +1,43 @@
@@ -1386,13 +1385,12 @@ index 0000000000000000000000000000000000000000..219b9ea88f8cebaf8aab73b123d3efd5
 +        }
 +    }
 +}
-\ No newline at end of file
 diff --git a/src/main/java/org/leavesmc/leaves/replay/ServerPhotographer.java b/src/main/java/org/leavesmc/leaves/replay/ServerPhotographer.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..e2cc869cf9596c63ab8d28e905c92faec5e5976f
+index 0000000000000000000000000000000000000000..f5c6e823d7ab9a61307e27e7b859e76bdfdd1e58
 --- /dev/null
 +++ b/src/main/java/org/leavesmc/leaves/replay/ServerPhotographer.java
-@@ -0,0 +1,221 @@
+@@ -0,0 +1,222 @@
 +package org.leavesmc.leaves.replay;
 +
 +import com.mojang.authlib.GameProfile;
@@ -1433,6 +1431,7 @@ index 0000000000000000000000000000000000000000..e2cc869cf9596c63ab8d28e905c92fae
 +
 +    private ServerPhotographer(MinecraftServer server, ServerLevel world, GameProfile profile) {
 +        super(server, world, profile, ClientInformation.createDefault());
++        this.gameMode = new ServerPhotographerGameMode(this);
 +        this.followPlayer = null;
 +        this.stats = new BotStatsCounter(server);
 +        this.lastPos = this.position();
@@ -1614,10 +1613,9 @@ index 0000000000000000000000000000000000000000..e2cc869cf9596c63ab8d28e905c92fae
 +        }
 +    }
 +}
-\ No newline at end of file
 diff --git a/src/main/java/org/leavesmc/leaves/replay/ServerPhotographerGameMode.java b/src/main/java/org/leavesmc/leaves/replay/ServerPhotographerGameMode.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..41adf5787bdab11806c76fd379275403c00466a9
+index 0000000000000000000000000000000000000000..c612215b0f1e8c3fae641e7a23c7cf7d165eca87
 --- /dev/null
 +++ b/src/main/java/org/leavesmc/leaves/replay/ServerPhotographerGameMode.java
 @@ -0,0 +1,35 @@
@@ -1656,10 +1654,9 @@ index 0000000000000000000000000000000000000000..41adf5787bdab11806c76fd379275403
 +    public void tick() {
 +    }
 +}
-\ No newline at end of file
 diff --git a/src/main/java/org/leavesmc/leaves/util/UUIDSerializer.java b/src/main/java/org/leavesmc/leaves/util/UUIDSerializer.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..93f72a99595a0b1f182f3950de36f1282a171e84
+index 0000000000000000000000000000000000000000..b0834f4b569b3e28ec7e026b3ff4236219498011
 --- /dev/null
 +++ b/src/main/java/org/leavesmc/leaves/util/UUIDSerializer.java
 @@ -0,0 +1,17 @@
@@ -1680,4 +1677,3 @@ index 0000000000000000000000000000000000000000..93f72a99595a0b1f182f3950de36f128
 +        return new JsonPrimitive(src.toString());
 +    }
 +}
-\ No newline at end of file
