@@ -20,7 +20,7 @@ index 1e3dc0cf613a621bbf0873bcffb01c69aa119e92..a42eb55c2f26a0048ea688655c5bb1df
      implementation("org.jline:jline-terminal-ffm:3.27.1") // use ffm on java 22+
      implementation("org.jline:jline-terminal-jni:3.27.1") // fall back to jni on java 21
 diff --git a/src/main/java/net/minecraft/server/network/ServerLoginPacketListenerImpl.java b/src/main/java/net/minecraft/server/network/ServerLoginPacketListenerImpl.java
-index 0afd30a9a4eb7de7e58e1b91342cca51c771f300..2e0461ae8eb5531a01a97d44db3e5387ded6e1fb 100644
+index e442fd1b80dd57d4420cab4da69ec3598ffc22d3..52fdc27ae63c2524e316620d905af7cd97112482 100644
 --- a/src/main/java/net/minecraft/server/network/ServerLoginPacketListenerImpl.java
 +++ b/src/main/java/net/minecraft/server/network/ServerLoginPacketListenerImpl.java
 @@ -92,6 +92,11 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
