@@ -1,0 +1,56 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: HaHaWTH <102713261+HaHaWTH@users.noreply.github.com>
+Date: Thu, 2 Jan 2025 00:00:00 -0800
+Subject: [PATCH] PaperPR Fix retain passengers teleport
+
+Original license: GPLv3
+Original project: https://github.com/PaperMC/Paper
+Paper pull request: https://github.com/PaperMC/Paper/pull/11858
+
+diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
+index 732f7229ff9ea32ecdde94a1c34d3e763d08dd15..f675f8c5d0d059572ee546c8773bdbecd5fd1641 100644
+--- a/src/main/java/net/minecraft/world/entity/Entity.java
++++ b/src/main/java/net/minecraft/world/entity/Entity.java
+@@ -4291,7 +4291,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+         }
+     }
+ 
+-    private void teleportPassengers() {
++    public void teleportPassengers() { // Leaf - private -> public
+         this.getSelfAndPassengers().forEach((entity) -> {
+             UnmodifiableIterator unmodifiableiterator = entity.passengers.iterator();
+ 
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftEntity.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftEntity.java
+index b0058d6895b00c10d28113ae7e37223c9cd107db..da7cb823271d10054d887292a7cec791cc63671b 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftEntity.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftEntity.java
+@@ -262,7 +262,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
+         // Paper start - Teleport passenger API
+         Set<io.papermc.paper.entity.TeleportFlag> flagSet = Set.of(flags);
+         boolean dismount = !flagSet.contains(io.papermc.paper.entity.TeleportFlag.EntityState.RETAIN_VEHICLE);
+-        boolean ignorePassengers = flagSet.contains(io.papermc.paper.entity.TeleportFlag.EntityState.RETAIN_PASSENGERS);
++        boolean retainPassengers = flagSet.contains(io.papermc.paper.entity.TeleportFlag.EntityState.RETAIN_PASSENGERS); // Leaf - Paper PR - Fix retain passengers teleport
+         // Don't allow teleporting between worlds while keeping passengers
+         if (flagSet.contains(io.papermc.paper.entity.TeleportFlag.EntityState.RETAIN_PASSENGERS) && this.entity.isVehicle() && location.getWorld() != this.getWorld()) {
+             if (!new org.purpurmc.purpur.event.entity.EntityTeleportHinderedEvent(entity.getBukkitEntity(), org.purpurmc.purpur.event.entity.EntityTeleportHinderedEvent.Reason.IS_VEHICLE, cause).callEvent()) // Purpur
+@@ -275,7 +275,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
+         }
+         // Paper end
+ 
+-        if ((!ignorePassengers && this.entity.isVehicle()) || this.entity.isRemoved()) { // Paper - Teleport passenger API
++        if ((!retainPassengers && this.entity.isVehicle()) || this.entity.isRemoved()) { // Paper - Teleport passenger API // Leaf - Paper PR - Fix retain passengers teleport
+             return false;
+         }
+ 
+@@ -306,6 +306,11 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
+         // SPIGOT-619: Force sync head rotation also
+         this.entity.setYHeadRot(location.getYaw());
+ 
++        // Leaf start - Paper PR - Fix retain passengers teleport #11858
++        // Ensure passengers of entity are teleported
++        if (retainPassengers && this.entity.isVehicle()) this.entity.teleportPassengers();
++        // Leaf end - Paper PR - Fix retain passengers teleport #11858
++
+         return true;
+     }
+ 
