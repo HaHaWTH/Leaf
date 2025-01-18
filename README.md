@@ -2,17 +2,17 @@
 <div align="center">
  
 [![Github Releases](https://img.shields.io/badge/Download-Releases-blue?&style=for-the-badge&colorA=19201a&colorB=298046)](https://github.com/Winds-Studio/Leaf/releases)⠀
-[![Github Actions Build](https://img.shields.io/github/actions/workflow/status/Winds-Studio/Leaf/build-1213.yml?&style=for-the-badge&colorA=19201a&colorB=298046)](https://github.com/Winds-Studio/Leaf/actions)⠀
+[![Github Actions Build](https://img.shields.io/github/actions/workflow/status/Winds-Studio/Leaf/build-1214.yml?&style=for-the-badge&colorA=19201a&colorB=298046)](https://github.com/Winds-Studio/Leaf/actions)⠀
 [![Discord](https://img.shields.io/discord/1145991395388162119?label=discord&style=for-the-badge&colorA=19201a&colorB=298046)](https://discord.gg/gfgAwdSEuM)
 
-**Leaf** is a drop-in replacement for [Paper](https://papermc.io/) servers designed to remove some checks, customized and high-performance, built on top of [Gale](https://github.com/Dreeam-qwq/Gale) with optimizations and fixes from other forks.
+**Leaf** is a [Paper](https://papermc.io/) fork designed to customized and high-performance, built on top of [Gale](https://github.com/Dreeam-qwq/Gale) with optimizations and fixes from other forks.
 </div>
 
 > [!WARNING]  
 > Leaf is an **EXPERIMENTAL** fork of [Paper](https://papermc.io/) there MAY BE issues depending on server to server, test and backup servers before switching to it.
 
 ## 🍃 Features
- - **Fork of [Gale](https://github.com/Dreeam-qwq/Gale)** for better performance
+ - **Based on [Gale](https://github.com/Dreeam-qwq/Gale)** for better performance
  - **Async** pathfinding, mob spawning and entity tracker
  - **Various optimizations** blending from [other forks](https://github.com/Winds-Studio/Leaf#-credits)
  - **Fully compatible** with Bukkit, Spigot and Paper plugins 
@@ -38,14 +38,14 @@ If you love my work, feel free to donate :)
 - afdian: https://afdian.com/a/Dreeam
 
 ## 📥 Download
-You can find latest successful build in [GitHub Action](https://github.com/Winds-Studio/Leaf/actions) or [Releases](https://github.com/Winds-Studio/Leaf/releases)
+You can find the latest successful build in [GitHub Action](https://github.com/Winds-Studio/Leaf/actions) or [Releases](https://github.com/Winds-Studio/Leaf/releases)
 
 **Please note Java >= 21 is required.**
 
 ## 📦 Building
 Building a Paperclip JAR for distribution:
 ```bash
-./gradlew applyPatches && ./gradlew createMojmapPaperclipJar
+./gradlew applyAllPatches && ./gradlew createMojmapPaperclipJar
 ```
 
 ## 🧪 API
@@ -61,7 +61,7 @@ Building a Paperclip JAR for distribution:
 <dependency>
     <groupId>cn.dreeam.leaf</groupId>
     <artifactId>leaf-api</artifactId>
-    <version>1.21.3-R0.1-SNAPSHOT</version>
+    <version>1.21.4-R0.1-SNAPSHOT</version>
     <scope>provided</scope>
 </dependency>
 ```
@@ -74,7 +74,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("cn.dreeam.leaf:leaf-api:1.21.3-R0.1-SNAPSHOT")
+    compileOnly("cn.dreeam.leaf:leaf-api:1.21.4-R0.1-SNAPSHOT")
 }
 
 java {
