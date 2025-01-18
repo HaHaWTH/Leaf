@@ -43,6 +43,9 @@ You can find latest successful build in [GitHub Action](https://github.com/Winds
 
 **Please note Java >= 21 is required.**
 
+## 📄 Documentation
+Documentation on how to use/configure Leaf: [docs.leafmc.one](https://docs.leafmc.one)
+
 ## 📦 Building
 Building a Paperclip JAR for distribution:
 ```bash
