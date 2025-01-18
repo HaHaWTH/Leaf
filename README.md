@@ -4,6 +4,7 @@
 [![Github Releases](https://img.shields.io/badge/Download-Releases-blue?&style=for-the-badge&colorA=19201a&colorB=298046)](https://github.com/Winds-Studio/Leaf/releases)⠀
 [![Github Actions Build](https://img.shields.io/github/actions/workflow/status/Winds-Studio/Leaf/build-1214.yml?&style=for-the-badge&colorA=19201a&colorB=298046)](https://github.com/Winds-Studio/Leaf/actions)⠀
 [![Discord](https://img.shields.io/discord/1145991395388162119?label=discord&style=for-the-badge&colorA=19201a&colorB=298046)](https://discord.gg/gfgAwdSEuM)
+[![Docs](https://img.shields.io/badge/Docs-docs.leafmc.one-blue?label=docs&style=for-the-badge&colorA=19201a&colorB=298046)](https://docs.leafmc.one)
 
 **Leaf** is a [Paper](https://papermc.io/) fork designed to customized and high-performance, built on top of [Gale](https://github.com/Dreeam-qwq/Gale) with optimizations and fixes from other forks.
 </div>
@@ -41,6 +42,9 @@ If you love my work, feel free to donate :)
 You can find the latest successful build in [GitHub Action](https://github.com/Winds-Studio/Leaf/actions) or [Releases](https://github.com/Winds-Studio/Leaf/releases)
 
 **Please note Java >= 21 is required.**
+
+## 📄 Documentation
+Documentation on how to use/configure Leaf: [docs.leafmc.one](https://docs.leafmc.one)
 
 ## 📦 Building
 Building a Paperclip JAR for distribution:
