@@ -2,9 +2,9 @@ name: Build Leaf 1.21.1
 
 on:
   push:
-    branches: [ "ver/1.21.1" ]
+    branches: [ "perf/chunk-gen" ]
   pull_request:
-    branches: [ "ver/1.21.1" ]
+    branches: [ "perf/chunk-gen" ]
 
 jobs:
   build:
@@ -63,8 +63,8 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: marvinpinto/action-automatic-releases@master
         with:
-          title: "Leaf 1.21.1"
-          automatic_release_tag: "ver-1.21.1"
+          title: "Leaf 1.21.1 EXPERIMENTAL BUILD"
+          automatic_release_tag: "ver-1.21.1-perf-chunkgen"
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           files: "./leaf-1.21.1.jar"
-          prerelease: false
+          prerelease: true
