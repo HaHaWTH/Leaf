@@ -264,6 +264,40 @@ index be7c1ecd78a169d2dc9f642fcddbf47ce6905439..1067077250bf942e3d8bd505cc7c3a47
          return this.entityLookup; // Paper - rewrite chunk system
      }
  
+diff --git a/src/main/java/net/minecraft/world/entity/ai/attributes/AttributeInstance.java b/src/main/java/net/minecraft/world/entity/ai/attributes/AttributeInstance.java
+index 7db8c3ea84c5f55e6015aba0130b94652c8ee84b..bde8013bdfad5b7f996feb599c5ed6a854ee9ea9 100644
+--- a/src/main/java/net/minecraft/world/entity/ai/attributes/AttributeInstance.java
++++ b/src/main/java/net/minecraft/world/entity/ai/attributes/AttributeInstance.java
+@@ -19,8 +19,10 @@ import net.minecraft.nbt.ListTag;
+ public class AttributeInstance {
+     private final Attribute attribute;
+     private final Map<AttributeModifier.Operation, Set<AttributeModifier>> modifiersByOperation = Maps.newEnumMap(AttributeModifier.Operation.class);
+-    private final Map<UUID, AttributeModifier> modifierById = new Object2ObjectArrayMap<>();
+-    private final Set<AttributeModifier> permanentModifiers = new ObjectArraySet<>();
++    // Leaf start - Multithreaded tracker
++    private final Map<UUID, AttributeModifier> modifierById = org.dreeam.leaf.config.modules.async.MultithreadedTracker.enabled ? new java.util.concurrent.ConcurrentHashMap<>() : new Object2ObjectArrayMap<>();
++    private final Set<AttributeModifier> permanentModifiers = org.dreeam.leaf.config.modules.async.MultithreadedTracker.enabled ? com.google.common.collect.Sets.newConcurrentHashSet() : new ObjectArraySet<>();
++    // Leaf end - Multithreaded tracker
+     private double baseValue;
+     private boolean dirty = true;
+     private double cachedValue;
+diff --git a/src/main/java/net/minecraft/world/entity/ai/attributes/AttributeMap.java b/src/main/java/net/minecraft/world/entity/ai/attributes/AttributeMap.java
+index 00790f8c0c7ba5132b51cdaa58e4d3419aac23ab..1dced6eb8941bf1ddf4013c3ad192376142974b0 100644
+--- a/src/main/java/net/minecraft/world/entity/ai/attributes/AttributeMap.java
++++ b/src/main/java/net/minecraft/world/entity/ai/attributes/AttributeMap.java
+@@ -22,8 +22,10 @@ import org.slf4j.Logger;
+ public class AttributeMap {
+     private static final Logger LOGGER = LogUtils.getLogger();
+     // Gale start - Lithium - replace AI attributes with optimized collections
+-    private final Map<Attribute, AttributeInstance> attributes = new Reference2ReferenceOpenHashMap<>(0);
+-    private final Set<AttributeInstance> dirtyAttributes = new ReferenceOpenHashSet<>(0);
++    // Leaf start - Multithreaded tracker
++    private final Map<Attribute, AttributeInstance> attributes = org.dreeam.leaf.config.modules.async.MultithreadedTracker.enabled ? new java.util.concurrent.ConcurrentHashMap<>(0) : new Reference2ReferenceOpenHashMap<>(0);
++    private final Set<AttributeInstance> dirtyAttributes = org.dreeam.leaf.config.modules.async.MultithreadedTracker.enabled ? com.google.common.collect.Sets.newConcurrentHashSet() : new ReferenceOpenHashSet<>(0);
++    // Leaf end - Multithreaded tracker
+     // Gale end - Lithium - replace AI attributes with optimized collections
+     private final AttributeSupplier supplier;
+     private final java.util.function.Function<Attribute, AttributeInstance> createInstance; // Gale - Airplane - reduce entity allocations
 diff --git a/src/main/java/org/dreeam/leaf/async/tracker/MultithreadedTracker.java b/src/main/java/org/dreeam/leaf/async/tracker/MultithreadedTracker.java
 new file mode 100644
 index 0000000000000000000000000000000000000000..13ae86d295f22ce0c373ae1246fc7cad8ff7662d
