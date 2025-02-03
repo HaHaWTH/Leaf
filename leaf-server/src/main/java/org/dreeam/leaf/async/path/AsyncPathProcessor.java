@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 public class AsyncPathProcessor {
     private static final Logger LOGGER = LogManager.getLogger("AsyncPathProcessor");
     private static final Set<UUID> queuedEntities = Sets.newConcurrentHashSet();
+    private static long lastWarnMillis = System.currentTimeMillis();
     private static final ThreadPoolExecutor pathProcessingExecutor = new ThreadPoolExecutor(
         org.dreeam.leaf.config.modules.async.AsyncPathfinding.asyncPathfindingMaxThreads,
         org.dreeam.leaf.config.modules.async.AsyncPathfinding.asyncPathfindingMaxThreads,
@@ -31,11 +32,30 @@ public class AsyncPathProcessor {
         new ThreadFactoryBuilder()
             .setNameFormat("Leaf Async Pathfinding Thread - %d")
             .setPriority(Thread.NORM_PRIORITY - 2)
-            .build()
+            .build(),
+        new RejectedTaskHandler()
     );
 
     static {
         pathProcessingExecutor.allowCoreThreadTimeOut(true);
+    }
+
+    private static class RejectedTaskHandler implements RejectedExecutionHandler {
+        @Override
+        public void rejectedExecution(Runnable rejectedTask, ThreadPoolExecutor executor) {
+            if (!executor.isShutdown()) {
+                try {
+                    rejectedTask.run();
+                } catch (Throwable th) {
+                    SneakyThrow.sneaky(th);
+                }
+            }
+
+            if (System.currentTimeMillis() - lastWarnMillis > 30000L) {
+                LOGGER.warn("Async pathfinding processor is busy! Pathfinding tasks will be done in the server thread. Increasing max-threads in Leaf config may help.");
+                lastWarnMillis = System.currentTimeMillis();
+            }
+        }
     }
 
     protected static void removeFromQueue(UUID entityId) {
