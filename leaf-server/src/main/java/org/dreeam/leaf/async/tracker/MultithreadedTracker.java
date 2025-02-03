@@ -31,6 +31,10 @@ public class MultithreadedTracker {
         getRejectedPolicy()
     );
 
+    static {
+        trackerExecutor.allowCoreThreadTimeOut(true);
+    }
+
     private MultithreadedTracker() {
     }
 
@@ -124,22 +128,18 @@ public class MultithreadedTracker {
     }
 
     private static int getCorePoolSize() {
-        return 1;
+        return org.dreeam.leaf.config.modules.async.MultithreadedTracker.asyncEntityTrackerMaxThreads;
     }
 
     private static int getMaxPoolSize() {
-        return org.dreeam.leaf.config.modules.async.MultithreadedTracker.autoResize ? Integer.MAX_VALUE : org.dreeam.leaf.config.modules.async.MultithreadedTracker.asyncEntityTrackerMaxThreads;
+        return org.dreeam.leaf.config.modules.async.MultithreadedTracker.asyncEntityTrackerMaxThreads;
     }
 
     private static long getKeepAliveTime() {
-        return org.dreeam.leaf.config.modules.async.MultithreadedTracker.autoResize ? 30L : org.dreeam.leaf.config.modules.async.MultithreadedTracker.asyncEntityTrackerKeepalive;
+        return org.dreeam.leaf.config.modules.async.MultithreadedTracker.asyncEntityTrackerKeepalive;
     }
 
     private static BlockingQueue<Runnable> getQueueImpl() {
-        if (org.dreeam.leaf.config.modules.async.MultithreadedTracker.autoResize) {
-            return new SynchronousQueue<>();
-        }
-
         final int queueCapacity = org.dreeam.leaf.config.modules.async.MultithreadedTracker.asyncEntityTrackerMaxThreads * (Math.max(org.dreeam.leaf.config.modules.async.MultithreadedTracker.asyncEntityTrackerMaxThreads, 4));
 
         return new LinkedBlockingQueue<>(queueCapacity);

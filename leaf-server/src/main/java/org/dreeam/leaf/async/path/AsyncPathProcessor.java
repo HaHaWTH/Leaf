@@ -16,8 +16,8 @@ import java.util.function.Consumer;
  */
 public class AsyncPathProcessor {
 
-    private static final Executor pathProcessingExecutor = new ThreadPoolExecutor(
-        1,
+    private static final ThreadPoolExecutor pathProcessingExecutor = new ThreadPoolExecutor(
+        org.dreeam.leaf.config.modules.async.AsyncPathfinding.asyncPathfindingMaxThreads,
         org.dreeam.leaf.config.modules.async.AsyncPathfinding.asyncPathfindingMaxThreads,
         org.dreeam.leaf.config.modules.async.AsyncPathfinding.asyncPathfindingKeepalive, TimeUnit.SECONDS,
         new LinkedBlockingQueue<>(),
@@ -26,6 +26,10 @@ public class AsyncPathProcessor {
             .setPriority(Thread.NORM_PRIORITY - 2)
             .build()
     );
+
+    static {
+        pathProcessingExecutor.allowCoreThreadTimeOut(true);
+    }
 
     protected static CompletableFuture<Void> queue(@NotNull AsyncPath path) {
         return CompletableFuture.runAsync(path::process, pathProcessingExecutor);
