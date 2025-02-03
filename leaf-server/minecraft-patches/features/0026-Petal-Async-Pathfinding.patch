@@ -725,7 +725,7 @@ index d6d3c8f5e5dd4a8cab0d3fcc131c3a59f06130c6..add5b8b98e4d09617cbd4e7dd2710dc5
              return false;
          } else if (pathentity.nodes.size() != this.nodes.size()) {
 diff --git a/net/minecraft/world/level/pathfinder/PathFinder.java b/net/minecraft/world/level/pathfinder/PathFinder.java
-index c2baadcdceb1df6a881d6f73aa4eb4dd264bcdfe..61912c67611ded5a8f34e0c55d3d3017f144f970 100644
+index c2baadcdceb1df6a881d6f73aa4eb4dd264bcdfe..754f71ae575cad5ec975b1c88441e1b67c92c240 100644
 --- a/net/minecraft/world/level/pathfinder/PathFinder.java
 +++ b/net/minecraft/world/level/pathfinder/PathFinder.java
 @@ -22,10 +22,18 @@ public class PathFinder {
@@ -785,7 +785,7 @@ index c2baadcdceb1df6a881d6f73aa4eb4dd264bcdfe..61912c67611ded5a8f34e0c55d3d3017
 +                return this.findPath(start, map, maxRange, accuracy, searchDepthMultiplier);
 +            }
 +
-+            return new org.dreeam.leaf.async.path.AsyncPath(Lists.newArrayList(), targetPositions, () -> {
++            return new org.dreeam.leaf.async.path.AsyncPath(mob.getUUID(), Lists.newArrayList(), targetPositions, () -> {
 +                try {
 +                    return this.processPath(nodeEvaluator, start, map, maxRange, accuracy, searchDepthMultiplier);
 +                } catch (Exception e) {

@@ -1,5 +1,6 @@
 package org.dreeam.leaf.async.path;
 
+import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import net.minecraft.server.MinecraftServer;
@@ -8,6 +9,8 @@ import net.minecraft.world.level.pathfinder.Path;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 
@@ -15,7 +18,7 @@ import java.util.function.Consumer;
  * used to handle the scheduling of async path processing
  */
 public class AsyncPathProcessor {
-
+    private static final Set<UUID> queuedEntities = Sets.newConcurrentHashSet();
     private static final ThreadPoolExecutor pathProcessingExecutor = new ThreadPoolExecutor(
         org.dreeam.leaf.config.modules.async.AsyncPathfinding.asyncPathfindingMaxThreads,
         org.dreeam.leaf.config.modules.async.AsyncPathfinding.asyncPathfindingMaxThreads,
@@ -31,8 +34,16 @@ public class AsyncPathProcessor {
         pathProcessingExecutor.allowCoreThreadTimeOut(true);
     }
 
+    protected static void removeFromQueue(UUID entityId) {
+        queuedEntities.remove(entityId);
+    }
+
     protected static CompletableFuture<Void> queue(@NotNull AsyncPath path) {
-        return CompletableFuture.runAsync(path::process, pathProcessingExecutor);
+        if (queuedEntities.contains(path.getPathOwner())) {
+            return CompletableFuture.completedFuture(null);
+        }
+        return CompletableFuture.runAsync(path::process, pathProcessingExecutor)
+            .orTimeout(60L, TimeUnit.SECONDS);
     }
 
     /**
