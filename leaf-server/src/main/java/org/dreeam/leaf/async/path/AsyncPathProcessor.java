@@ -4,7 +4,7 @@ import com.destroystokyo.paper.util.SneakyThrow;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.pathfinder.Path;
 
 import org.apache.logging.log4j.LogManager;
@@ -12,6 +12,8 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.*;
@@ -28,7 +30,7 @@ public class AsyncPathProcessor {
         org.dreeam.leaf.config.modules.async.AsyncPathfinding.asyncPathfindingMaxThreads,
         org.dreeam.leaf.config.modules.async.AsyncPathfinding.asyncPathfindingMaxThreads,
         org.dreeam.leaf.config.modules.async.AsyncPathfinding.asyncPathfindingKeepalive, TimeUnit.SECONDS,
-        new LinkedBlockingQueue<>(),
+        getQueueImpl(),
         new ThreadFactoryBuilder()
             .setNameFormat("Leaf Async Pathfinding Thread - %d")
             .setPriority(Thread.NORM_PRIORITY - 2)
@@ -43,12 +45,19 @@ public class AsyncPathProcessor {
     private static class RejectedTaskHandler implements RejectedExecutionHandler {
         @Override
         public void rejectedExecution(Runnable rejectedTask, ThreadPoolExecutor executor) {
+            BlockingQueue<Runnable> workQueue = executor.getQueue();
             if (!executor.isShutdown()) {
-                try {
-                    rejectedTask.run();
-                } catch (Throwable th) {
-                    SneakyThrow.sneaky(th);
+                if (!workQueue.isEmpty()) {
+                    List<Runnable> pendingTasks = new ArrayList<>(workQueue.size());
+
+                    workQueue.drainTo(pendingTasks);
+
+                    for (Runnable pendingTask : pendingTasks) {
+                        pendingTask.run();
+                    }
                 }
+
+                rejectedTask.run();
             }
 
             if (System.currentTimeMillis() - lastWarnMillis > 30000L) {
@@ -64,7 +73,7 @@ public class AsyncPathProcessor {
 
     protected static CompletableFuture<Void> queue(@NotNull AsyncPath path) {
         if (queuedEntities.contains(path.getPathOwner())) {
-            return CompletableFuture.completedFuture(null);
+            return CompletableFuture.completedFuture(null); // Directly return if we already have a queued path for this entity
         }
         return CompletableFuture.runAsync(path::process, pathProcessingExecutor)
             .orTimeout(60L, TimeUnit.SECONDS)
@@ -82,16 +91,22 @@ public class AsyncPathProcessor {
      * the consumer will be immediately invoked if the path is already processed
      * the consumer will always be called on the main thread
      *
+     * @param entity          the entity that owns the path
      * @param path            a path to wait on
      * @param afterProcessing a consumer to be called
      */
-    public static void awaitProcessing(@Nullable Path path, Consumer<@Nullable Path> afterProcessing) {
+    public static void awaitProcessing(Entity entity, @Nullable Path path, Consumer<@Nullable Path> afterProcessing) {
         if (path != null && !path.isProcessed() && path instanceof AsyncPath asyncPath) {
             asyncPath.postProcessing(() ->
-                MinecraftServer.getServer().scheduleOnMain(() -> afterProcessing.accept(path))
+                entity.getBukkitEntity().taskScheduler.schedule(nmsEntity -> afterProcessing.accept(path), null, 1)
             );
         } else {
             afterProcessing.accept(path);
         }
     }
-}
+
+    private static BlockingQueue<Runnable> getQueueImpl() {
+        final int queueCapacity = org.dreeam.leaf.config.modules.async.AsyncPathfinding.asyncPathfindingMaxThreads * (Math.max(org.dreeam.leaf.config.modules.async.AsyncPathfinding.asyncPathfindingMaxThreads, 4));
+
+        return new LinkedBlockingQueue<>(queueCapacity);
+    }}
