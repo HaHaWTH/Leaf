@@ -20,7 +20,8 @@ import java.util.concurrent.*;
 
 public class MultithreadedTracker {
 
-    private static final Logger LOGGER = LogManager.getLogger("MultithreadedTracker");
+    private static final String THREAD_PREFIX = "Leaf Async Tracker";
+    private static final Logger LOGGER = LogManager.getLogger(THREAD_PREFIX);
     private static long lastWarnMillis = System.currentTimeMillis();
     private static final ThreadPoolExecutor trackerExecutor = new ThreadPoolExecutor(
         getCorePoolSize(),
@@ -148,7 +149,7 @@ public class MultithreadedTracker {
     private static @NotNull ThreadFactory getThreadFactory() {
         return new ThreadFactoryBuilder()
             .setThreadFactory(MultithreadedTrackerThread::new)
-            .setNameFormat("Leaf Async Tracker Thread - %d")
+            .setNameFormat(THREAD_PREFIX + " Thread - %d")
             .setPriority(Thread.NORM_PRIORITY - 2)
             .build();
     }

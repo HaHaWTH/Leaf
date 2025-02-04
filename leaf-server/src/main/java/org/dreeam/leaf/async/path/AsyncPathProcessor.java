@@ -20,7 +20,9 @@ import java.util.function.Consumer;
  * used to handle the scheduling of async path processing
  */
 public class AsyncPathProcessor {
-    private static final Logger LOGGER = LogManager.getLogger("AsyncPathProcessor");
+
+    private static final String THREAD_PREFIX = "Leaf Async Pathfinding";
+    private static final Logger LOGGER = LogManager.getLogger(THREAD_PREFIX);
     private static long lastWarnMillis = System.currentTimeMillis();
     private static final ThreadPoolExecutor pathProcessingExecutor = new ThreadPoolExecutor(
         org.dreeam.leaf.config.modules.async.AsyncPathfinding.asyncPathfindingMaxThreads,
@@ -28,7 +30,7 @@ public class AsyncPathProcessor {
         org.dreeam.leaf.config.modules.async.AsyncPathfinding.asyncPathfindingKeepalive, TimeUnit.SECONDS,
         getQueueImpl(),
         new ThreadFactoryBuilder()
-            .setNameFormat("Leaf Async Pathfinding Thread - %d")
+            .setNameFormat(THREAD_PREFIX + " Thread - %d")
             .setPriority(Thread.NORM_PRIORITY - 2)
             .build(),
         new RejectedTaskHandler()
