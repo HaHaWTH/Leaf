@@ -25,7 +25,7 @@ public class AsyncPathProcessor {
     private static final Logger LOGGER = LogManager.getLogger(THREAD_PREFIX);
     private static long lastWarnMillis = System.currentTimeMillis();
     private static final ThreadPoolExecutor pathProcessingExecutor = new ThreadPoolExecutor(
-        org.dreeam.leaf.config.modules.async.AsyncPathfinding.asyncPathfindingMaxThreads,
+        1,
         org.dreeam.leaf.config.modules.async.AsyncPathfinding.asyncPathfindingMaxThreads,
         org.dreeam.leaf.config.modules.async.AsyncPathfinding.asyncPathfindingKeepalive, TimeUnit.SECONDS,
         getQueueImpl(),
@@ -35,10 +35,6 @@ public class AsyncPathProcessor {
             .build(),
         new RejectedTaskHandler()
     );
-
-    static {
-        pathProcessingExecutor.allowCoreThreadTimeOut(true);
-    }
 
     private static class RejectedTaskHandler implements RejectedExecutionHandler {
         @Override

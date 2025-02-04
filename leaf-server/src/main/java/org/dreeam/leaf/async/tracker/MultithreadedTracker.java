@@ -32,10 +32,6 @@ public class MultithreadedTracker {
         getRejectedPolicy()
     );
 
-    static {
-        trackerExecutor.allowCoreThreadTimeOut(true);
-    }
-
     private MultithreadedTracker() {
     }
 
@@ -129,7 +125,7 @@ public class MultithreadedTracker {
     }
 
     private static int getCorePoolSize() {
-        return org.dreeam.leaf.config.modules.async.MultithreadedTracker.asyncEntityTrackerMaxThreads;
+        return 1;
     }
 
     private static int getMaxPoolSize() {
