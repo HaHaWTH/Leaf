@@ -27,7 +27,7 @@ index 14d9dceacc82cc6c085dab8f52e59a318dd8cae5..8b3dfb1385a2252a4aaead5558c0ffbd
      }
  
 diff --git a/net/minecraft/world/entity/ai/behavior/AcquirePoi.java b/net/minecraft/world/entity/ai/behavior/AcquirePoi.java
-index 7f0975f8bd6d5f8ca28f503f93c8cb5c42557420..36a9771076d0b323cba828d142a8116f8c28481a 100644
+index 7f0975f8bd6d5f8ca28f503f93c8cb5c42557420..eb71f045d3e8698a8a9e9f51176c2884f71a034c 100644
 --- a/net/minecraft/world/entity/ai/behavior/AcquirePoi.java
 +++ b/net/minecraft/world/entity/ai/behavior/AcquirePoi.java
 @@ -102,21 +102,20 @@ public class AcquirePoi {
@@ -49,7 +49,7 @@ index 7f0975f8bd6d5f8ca28f503f93c8cb5c42557420..36a9771076d0b323cba828d142a8116f
 +                                Path possiblePath = findPathToPois(mob, set);
 +
 +                                // wait on the path to be processed
-+                                org.dreeam.leaf.async.path.AsyncPathProcessor.awaitProcessing(mob, possiblePath, path -> {
++                                org.dreeam.leaf.async.path.AsyncPathProcessor.awaitProcessing(possiblePath, path -> {
 +                                    processPath(acquirablePois, entityEventId, (Long2ObjectMap<JitteredLinearRetry>) map, memoryAccessor, level, mob, time, poiManager, set, path);
                                  });
                              } else {
@@ -225,7 +225,7 @@ index 621ba76784f2b92790eca62be4d0688834335ab6..e2e1532d2ffb709e347db42b1b5b6cae
      private boolean tryComputePath(Mob mob, WalkTarget target, long time) {
          BlockPos blockPos = target.getTarget().currentBlockPosition();
 diff --git a/net/minecraft/world/entity/ai/behavior/SetClosestHomeAsWalkTarget.java b/net/minecraft/world/entity/ai/behavior/SetClosestHomeAsWalkTarget.java
-index 4f9f3367b1ca3903df03a80fa2b01a3d24e6e77d..8c1ad993aa7e59e96df9959c2c2a47cfa9e33515 100644
+index 4f9f3367b1ca3903df03a80fa2b01a3d24e6e77d..51413df5cd61b3ff59c6c6c3ec69d6732ab07d83 100644
 --- a/net/minecraft/world/entity/ai/behavior/SetClosestHomeAsWalkTarget.java
 +++ b/net/minecraft/world/entity/ai/behavior/SetClosestHomeAsWalkTarget.java
 @@ -60,17 +60,20 @@ public class SetClosestHomeAsWalkTarget {
@@ -238,7 +238,7 @@ index 4f9f3367b1ca3903df03a80fa2b01a3d24e6e77d..8c1ad993aa7e59e96df9959c2c2a47cf
 +                                    Path possiblePath = AcquirePoi.findPathToPois(mob, set);
 +
 +                                    // wait on the path to be processed
-+                                    org.dreeam.leaf.async.path.AsyncPathProcessor.awaitProcessing(mob, possiblePath, path -> {
++                                    org.dreeam.leaf.async.path.AsyncPathProcessor.awaitProcessing(possiblePath, path -> {
 +                                        processPath(speedModifier, map, mutableLong, walkTarget, level, poiManager, mutableInt, path);
 +                                    });
 +                                } else {
@@ -398,7 +398,7 @@ index 045cfafb3afe8271d60852ae3c7cdcb039b44d4f..3f55b00e2f8924a8450df8a3f9812a4a
      }
  
 diff --git a/net/minecraft/world/entity/ai/navigation/PathNavigation.java b/net/minecraft/world/entity/ai/navigation/PathNavigation.java
-index 6c8fb611943aee8cabc471c63166f9b44ef14826..d2a4fef7460b6ec6b9119cdde31663adaf14a697 100644
+index 6c8fb611943aee8cabc471c63166f9b44ef14826..25ef9b67eee01c6df466031c5dbc728b1a754ab2 100644
 --- a/net/minecraft/world/entity/ai/navigation/PathNavigation.java
 +++ b/net/minecraft/world/entity/ai/navigation/PathNavigation.java
 @@ -167,6 +167,10 @@ public abstract class PathNavigation {
@@ -421,7 +421,7 @@ index 6c8fb611943aee8cabc471c63166f9b44ef14826..d2a4fef7460b6ec6b9119cdde31663ad
 +                // assign early a target position. most calls will only have 1 position
 +                if (!targets.isEmpty()) this.targetPos = targets.iterator().next();
 +
-+                org.dreeam.leaf.async.path.AsyncPathProcessor.awaitProcessing(mob, path, processedPath -> {
++                org.dreeam.leaf.async.path.AsyncPathProcessor.awaitProcessing(path, processedPath -> {
 +                    // check that processing didn't take so long that we calculated a new path
 +                    if (processedPath != this.path) return;
 +
@@ -511,7 +511,7 @@ index 2979846853898d78a2df19df2287da16dbe4ae71..1289a6e85f3fdb9187323343b6c20e17
      }
  
 diff --git a/net/minecraft/world/entity/ai/sensing/NearestBedSensor.java b/net/minecraft/world/entity/ai/sensing/NearestBedSensor.java
-index 1f96fd5085bacb4c584576c7cb9f51e7898e9b03..3af61b7862e63acf691b1a401e4752076faf29c7 100644
+index 1f96fd5085bacb4c584576c7cb9f51e7898e9b03..8819717c5307a90abc493cf801b4e795c13b3460 100644
 --- a/net/minecraft/world/entity/ai/sensing/NearestBedSensor.java
 +++ b/net/minecraft/world/entity/ai/sensing/NearestBedSensor.java
 @@ -57,17 +57,32 @@ public class NearestBedSensor extends Sensor<Mob> {
@@ -531,8 +531,8 @@ index 1f96fd5085bacb4c584576c7cb9f51e7898e9b03..3af61b7862e63acf691b1a401e475207
 +            // Kaiiju start - await on async path processing
 +            if (org.dreeam.leaf.config.modules.async.AsyncPathfinding.enabled) {
 +                Path possiblePath = AcquirePoi.findPathToPois(entity, new java.util.HashSet<>(poiposes));
-+                org.dreeam.leaf.async.path.AsyncPathProcessor.awaitProcessing(entity, possiblePath, path -> {
-+                    processPath(entity, poiManager, possiblePath);
++                org.dreeam.leaf.async.path.AsyncPathProcessor.awaitProcessing(possiblePath, path -> {
++                    processPath(entity, poiManager, path);
 +                });
 +            } else {
 +                // Kaiiju end

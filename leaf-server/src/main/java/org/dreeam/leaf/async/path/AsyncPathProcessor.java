@@ -3,7 +3,7 @@ package org.dreeam.leaf.async.path;
 import com.destroystokyo.paper.util.SneakyThrow;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import net.minecraft.world.entity.Entity;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.pathfinder.Path;
 
 import org.apache.logging.log4j.LogManager;
@@ -77,14 +77,13 @@ public class AsyncPathProcessor {
      * the consumer will be immediately invoked if the path is already processed
      * the consumer will always be called on the main thread
      *
-     * @param entity          the entity that owns the path
      * @param path            a path to wait on
      * @param afterProcessing a consumer to be called
      */
-    public static void awaitProcessing(Entity entity, @Nullable Path path, Consumer<@Nullable Path> afterProcessing) {
+    public static void awaitProcessing(@Nullable Path path, Consumer<@Nullable Path> afterProcessing) {
         if (path != null && !path.isProcessed() && path instanceof AsyncPath asyncPath) {
             asyncPath.postProcessing(() ->
-                entity.getBukkitEntity().taskScheduler.schedule(nmsEntity -> afterProcessing.accept(path), null, 1)
+                MinecraftServer.getServer().scheduleOnMain(() -> afterProcessing.accept(path))
             );
         } else {
             afterProcessing.accept(path);
