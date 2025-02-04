@@ -11,7 +11,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 /**
@@ -66,16 +65,13 @@ public class AsyncPath extends Path {
      */
     private boolean canReach = true;
 
-    private final UUID owner;
-
-    public AsyncPath(@NotNull UUID owner, @NotNull List<Node> emptyNodeList, @NotNull Set<BlockPos> positions, @NotNull Supplier<Path> pathSupplier) {
+    public AsyncPath(@NotNull List<Node> emptyNodeList, @NotNull Set<BlockPos> positions, @NotNull Supplier<Path> pathSupplier) {
         //noinspection ConstantConditions
         super(emptyNodeList, null, false);
 
         this.nodes = emptyNodeList;
         this.positions = positions;
         this.pathSupplier = pathSupplier;
-        this.owner = owner;
 
         AsyncPathProcessor.queue(this);
     }
@@ -119,7 +115,6 @@ public class AsyncPath extends Path {
             return;
         }
 
-        AsyncPathProcessor.removeFromQueue(this.owner);
         processState = PathProcessState.PROCESSING;
 
         final Path bestPath = this.pathSupplier.get();
@@ -289,9 +284,5 @@ public class AsyncPath extends Path {
 
     public PathProcessState getProcessState() {
         return processState;
-    }
-
-    public UUID getPathOwner() {
-        return owner;
     }
 }

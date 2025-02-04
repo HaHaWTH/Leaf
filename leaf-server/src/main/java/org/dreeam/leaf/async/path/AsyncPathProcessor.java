@@ -1,7 +1,6 @@
 package org.dreeam.leaf.async.path;
 
 import com.destroystokyo.paper.util.SneakyThrow;
-import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import net.minecraft.world.entity.Entity;
@@ -14,8 +13,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 
@@ -24,7 +21,6 @@ import java.util.function.Consumer;
  */
 public class AsyncPathProcessor {
     private static final Logger LOGGER = LogManager.getLogger("AsyncPathProcessor");
-    private static final Set<UUID> queuedEntities = Sets.newConcurrentHashSet();
     private static long lastWarnMillis = System.currentTimeMillis();
     private static final ThreadPoolExecutor pathProcessingExecutor = new ThreadPoolExecutor(
         org.dreeam.leaf.config.modules.async.AsyncPathfinding.asyncPathfindingMaxThreads,
@@ -67,20 +63,12 @@ public class AsyncPathProcessor {
         }
     }
 
-    protected static void removeFromQueue(UUID entityId) {
-        queuedEntities.remove(entityId);
-    }
-
     protected static CompletableFuture<Void> queue(@NotNull AsyncPath path) {
-        if (queuedEntities.contains(path.getPathOwner())) {
-            return CompletableFuture.completedFuture(null); // Directly return if we already have a queued path for this entity
-        }
         return CompletableFuture.runAsync(path::process, pathProcessingExecutor)
             .orTimeout(60L, TimeUnit.SECONDS)
             .exceptionally(throwable -> {
-                removeFromQueue(path.getPathOwner());
                 if (throwable instanceof TimeoutException e) {
-                    LOGGER.error("Async Pathfinding process timed out for entity {}", path.getPathOwner(), e);
+                    LOGGER.warn("Async Pathfinding process timed out", e);
                 } else SneakyThrow.sneaky(throwable);
                 return null;
             });
