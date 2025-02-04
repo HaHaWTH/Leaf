@@ -14,6 +14,7 @@ public class MultithreadedTracker extends ConfigModules {
     public static boolean compatModeEnabled = false;
     public static int asyncEntityTrackerMaxThreads = 0;
     public static int asyncEntityTrackerKeepalive = 60;
+    public static int asyncEntityTrackerQueueSize = 0;
 
     @Override
     public void onLoaded() {
@@ -34,6 +35,7 @@ public class MultithreadedTracker extends ConfigModules {
                 如果你的服务器安装了 Citizens 或其他类似非发包 NPC 插件, 请开启此项."""));
         asyncEntityTrackerMaxThreads = config.getInt(getBasePath() + ".max-threads", asyncEntityTrackerMaxThreads);
         asyncEntityTrackerKeepalive = config.getInt(getBasePath() + ".keepalive", asyncEntityTrackerKeepalive);
+        asyncEntityTrackerQueueSize = config.getInt(getBasePath() + ".queue-size", asyncEntityTrackerQueueSize);
 
         if (asyncEntityTrackerMaxThreads < 0)
             asyncEntityTrackerMaxThreads = Math.max(Runtime.getRuntime().availableProcessors() + asyncEntityTrackerMaxThreads, 1);
@@ -44,5 +46,8 @@ public class MultithreadedTracker extends ConfigModules {
             asyncEntityTrackerMaxThreads = 0;
         else
             LeafConfig.LOGGER.info("Using {} threads for Async Entity Tracker", asyncEntityTrackerMaxThreads);
+
+        if (asyncEntityTrackerQueueSize <= 0)
+            asyncEntityTrackerQueueSize = asyncEntityTrackerMaxThreads * Math.max(asyncEntityTrackerMaxThreads, 4);
     }
 }

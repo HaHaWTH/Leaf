@@ -137,7 +137,7 @@ public class MultithreadedTracker {
     }
 
     private static BlockingQueue<Runnable> getQueueImpl() {
-        final int queueCapacity = org.dreeam.leaf.config.modules.async.MultithreadedTracker.asyncEntityTrackerMaxThreads * (Math.max(org.dreeam.leaf.config.modules.async.MultithreadedTracker.asyncEntityTrackerMaxThreads, 4));
+        final int queueCapacity = org.dreeam.leaf.config.modules.async.MultithreadedTracker.asyncEntityTrackerQueueSize;
 
         return new LinkedBlockingQueue<>(queueCapacity);
     }

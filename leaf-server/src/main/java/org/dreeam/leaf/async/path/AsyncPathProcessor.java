@@ -91,7 +91,7 @@ public class AsyncPathProcessor {
     }
 
     private static BlockingQueue<Runnable> getQueueImpl() {
-        final int queueCapacity = org.dreeam.leaf.config.modules.async.AsyncPathfinding.asyncPathfindingMaxThreads * (Math.max(org.dreeam.leaf.config.modules.async.AsyncPathfinding.asyncPathfindingMaxThreads, 4));
+        final int queueCapacity = org.dreeam.leaf.config.modules.async.AsyncPathfinding.asyncPathfindingQueueSize;
 
         return new LinkedBlockingQueue<>(queueCapacity);
     }}

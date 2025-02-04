@@ -13,12 +13,14 @@ public class AsyncPathfinding extends ConfigModules {
     public static boolean enabled = false;
     public static int asyncPathfindingMaxThreads = 0;
     public static int asyncPathfindingKeepalive = 60;
+    public static int asyncPathfindingQueueSize = 0;
 
     @Override
     public void onLoaded() {
         enabled = config.getBoolean(getBasePath() + ".enabled", enabled);
         asyncPathfindingMaxThreads = config.getInt(getBasePath() + ".max-threads", asyncPathfindingMaxThreads);
         asyncPathfindingKeepalive = config.getInt(getBasePath() + ".keepalive", asyncPathfindingKeepalive);
+        asyncPathfindingQueueSize = config.getInt(getBasePath() + ".queue-size", asyncPathfindingQueueSize);
 
         if (asyncPathfindingMaxThreads < 0)
             asyncPathfindingMaxThreads = Math.max(Runtime.getRuntime().availableProcessors() + asyncPathfindingMaxThreads, 1);
@@ -28,5 +30,8 @@ public class AsyncPathfinding extends ConfigModules {
             asyncPathfindingMaxThreads = 0;
         else
             LeafConfig.LOGGER.info("Using {} threads for Async Pathfinding", asyncPathfindingMaxThreads);
+
+        if (asyncPathfindingQueueSize <= 0)
+            asyncPathfindingQueueSize = asyncPathfindingMaxThreads * Math.max(asyncPathfindingMaxThreads, 4);
     }
 }
