@@ -41,21 +41,25 @@ public class AsyncPathProcessor {
         public void rejectedExecution(Runnable rejectedTask, ThreadPoolExecutor executor) {
             BlockingQueue<Runnable> workQueue = executor.getQueue();
             if (!executor.isShutdown()) {
-                if (!workQueue.isEmpty()) {
-                    List<Runnable> pendingTasks = new ArrayList<>(workQueue.size());
+                switch (org.dreeam.leaf.config.modules.async.AsyncPathfinding.asyncPathfindingRejectPolicy) {
+                    case FLUSH_ALL -> {
+                        if (!workQueue.isEmpty()) {
+                            List<Runnable> pendingTasks = new ArrayList<>(workQueue.size());
 
-                    workQueue.drainTo(pendingTasks);
+                            workQueue.drainTo(pendingTasks);
 
-                    for (Runnable pendingTask : pendingTasks) {
-                        pendingTask.run();
+                            for (Runnable pendingTask : pendingTasks) {
+                                pendingTask.run();
+                            }
+                        }
+                        rejectedTask.run();
                     }
+                    case CALLER_RUNS -> rejectedTask.run();
                 }
-
-                rejectedTask.run();
             }
 
             if (System.currentTimeMillis() - lastWarnMillis > 30000L) {
-                LOGGER.warn("Async pathfinding processor is busy! Pathfinding tasks will be done in the server thread. Increasing max-threads in Leaf config may help.");
+                LOGGER.warn("Async pathfinding processor is busy! Pathfinding tasks will be treated as policy defined in config. Increasing max-threads in Leaf config may help.");
                 lastWarnMillis = System.currentTimeMillis();
             }
         }
