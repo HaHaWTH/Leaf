@@ -9,10 +9,10 @@ Added some asynchronous structure locate methods in World,
 requires async-locator to be enabled in Leaf config, or else it will fall back to sync methods.
 
 diff --git a/src/main/java/org/bukkit/World.java b/src/main/java/org/bukkit/World.java
-index 3af8eb8064aeafa3606fed23e7ca2bc74c194726..bde99ad96b722039a2f89a0fa07a660b5179f4fd 100644
+index 3af8eb8064aeafa3606fed23e7ca2bc74c194726..2d314d7f75f320384c20c97f60c0c9611b890316 100644
 --- a/src/main/java/org/bukkit/World.java
 +++ b/src/main/java/org/bukkit/World.java
-@@ -4047,6 +4047,58 @@ public interface World extends RegionAccessor, WorldInfo, PluginMessageRecipient
+@@ -4047,6 +4047,60 @@ public interface World extends RegionAccessor, WorldInfo, PluginMessageRecipient
      @Nullable
      StructureSearchResult locateNearestStructure(@NotNull Location origin, @NotNull Structure structure, int radius, boolean findUnexplored);
  
@@ -40,6 +40,7 @@ index 3af8eb8064aeafa3606fed23e7ca2bc74c194726..bde99ad96b722039a2f89a0fa07a660b
 +     * @param afterComplete the action to perform once the search is complete.
 +     * @see #locateNearestStructureAsync(Location, Structure, int, boolean, Consumer)
 +     */
++    @org.jetbrains.annotations.ApiStatus.Experimental
 +    void locateNearestStructureAsync(@NotNull Location origin, @NotNull StructureType structureType, int radius, boolean findUnexplored, @NotNull Consumer<@Nullable StructureSearchResult> afterComplete);
 +
 +    /**
@@ -65,6 +66,7 @@ index 3af8eb8064aeafa3606fed23e7ca2bc74c194726..bde99ad96b722039a2f89a0fa07a660b
 +     * @param afterComplete the action to perform on server thread once the search is complete.
 +     * @see #locateNearestStructureAsync(Location, StructureType, int, boolean, Consumer)
 +     */
++    @org.jetbrains.annotations.ApiStatus.Experimental
 +    void locateNearestStructureAsync(@NotNull Location origin, @NotNull Structure structure, int radius, boolean findUnexplored, @NotNull Consumer<@Nullable StructureSearchResult> afterComplete);
 +    // Leaf end - Async structure locate api
 +
