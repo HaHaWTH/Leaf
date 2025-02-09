@@ -10,7 +10,7 @@
 </div>
 
 > [!WARNING]  
-> Leaf is an **EXPERIMENTAL** fork of [Paper](https://papermc.io/) there MAY BE issues depending on server to server, test and backup servers before switching to it.
+> Leaf is a performance-oriented fork. Make sure to take backups **before** switching to it. Everyone is welcome to contribute by optimizing or reporting issues.
 
 ## 🍃 Features
  - **Based on [Gale](https://github.com/Dreeam-qwq/Gale)** for better performance
@@ -35,8 +35,7 @@
 - QQ Group: `619278377`
 
 ## 📫 Donation
-If you love my work, feel free to donate :)
-- AFDIAN: https://afdian.com/a/Dreeam
+If you love our work, feel free to donate via our [Open Collective](https://opencollective.com/Winds-Studio) or [Dreeam's AFDIAN](https://afdian.com/a/Dreeam) :)
 
 ## 📥 Download
 You can find the latest successful build in [GitHub Action](https://github.com/Winds-Studio/Leaf/actions) or [Releases](https://github.com/Winds-Studio/Leaf/releases)
