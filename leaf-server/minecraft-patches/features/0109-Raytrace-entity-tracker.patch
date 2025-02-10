@@ -1,0 +1,61 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: HaHaWTH <102713261+HaHaWTH@users.noreply.github.com>
+Date: Mon, 1 Nov 2077 00:00:00 -0800
+Subject: [PATCH] Raytrace entity tracker
+
+
+diff --git a/net/minecraft/server/level/ChunkMap.java b/net/minecraft/server/level/ChunkMap.java
+index 8986c059e7aadb58ae8d9ab7b848de10f9faa6b2..1da0e85d9d561cf639b6046013b0c3ed80d4d6c8 100644
+--- a/net/minecraft/server/level/ChunkMap.java
++++ b/net/minecraft/server/level/ChunkMap.java
+@@ -1273,6 +1273,17 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
+                         flag = vec3_dy * vec3_dy <= rangeY * rangeY;
+                     }
+                 }
++                // Leaf start - Raytrace entity tracking
++                if (org.dreeam.leaf.config.modules.opt.RaytraceTracker.enabled && flag) {
++                    if (org.dreeam.leaf.config.modules.async.MultithreadedTracker.enabled) {
++                        synchronized (this.entity) {
++                            flag = raytraceTracking0(this.entity, player);
++                        }
++                    } else {
++                        flag = raytraceTracking0(this.entity, player);
++                    }
++                }
++                // Leaf end - Raytrace entity tracking
+                 flag = flag && this.entity.broadcastToPlayer(player) && ChunkMap.this.isChunkTracked(player, this.entity.chunkPosition().x, this.entity.chunkPosition().z);
+                 // Paper end - Configurable entity tracking range by Y
+                 // CraftBukkit start - respect vanish API
+@@ -1326,4 +1337,14 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
+             }
+         }
+     }
++    // Leaf start - Raytrace entity tracking
++    private static boolean raytraceTracking0(Entity entity, ServerPlayer player) {
++        if (!player.hasLineOfSight(entity, net.minecraft.world.level.ClipContext.Block.VISUAL, net.minecraft.world.level.ClipContext.Fluid.NONE, entity.getEyeY())) {
++            entity.lostSightTicks++;
++        } else {
++            entity.lostSightTicks = 0;
++        }
++        return !entity.shouldBeCulled();
++    }
++    // Leaf end - Raytrace entity tracking
+ }
+diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
+index 3beb2b05265cf274f52170018cc22243b06c05e9..9c9214dfd188cd6a29a4fe68ff7af6e1b3599feb 100644
+--- a/net/minecraft/world/entity/Entity.java
++++ b/net/minecraft/world/entity/Entity.java
+@@ -383,6 +383,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+     private int sectionY = Integer.MIN_VALUE;
+     private int sectionZ = Integer.MIN_VALUE;
+     private boolean updatingSectionStatus;
++    public int lostSightTicks; // Leaf - Raytrace entity tracking
+ 
+     @Override
+     public final boolean moonrise$isHardColliding() {
+@@ -5234,4 +5235,5 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+         return this.distanceToSqr(entity.position());
+     }
+     // Leaf end - Optimize Entity distanceToSqr
++    public boolean shouldBeCulled() { return this.lostSightTicks > org.dreeam.leaf.config.modules.opt.RaytraceTracker.cullingDelayTicks; } // Leaf - Raytrace entity tracking
+ }
